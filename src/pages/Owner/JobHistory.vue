@@ -10,33 +10,35 @@ import {
   NCard,
   NSelect,
   NDivider,
+  NDatePicker,
   NInput,
   NInputNumber,
   useNotification, NotificationType
 } from "naive-ui";
 import {Send, EyeOutline, DocumentTextOutline, Close} from "@vicons/ionicons5";
-import {Delivery } from "@vicons/carbon";
-import {Collections20Regular } from "@vicons/fluent";
+import {Delivery} from "@vicons/carbon";
+import {Collections20Regular} from "@vicons/fluent";
 import {useJobStore} from "@store/jobStore.ts";
 import moment from "moment";
-import {ref,computed} from "vue";
+import {ref, computed} from "vue";
 import {CutSheet, Job, Task} from "@/types/Types.ts";
 import {useSheetStore} from "@store/sheetStore.ts";
 import {JobType} from "@/types/JobType.ts";
 import {useAdminStore} from "@store/adminStore.ts";
 import {compareText} from "@/helper/Security.ts";
+import OwnerLayout from "@/Layout/OwnerLayout.vue";
 
-const TagColor = (task:string) => {
+const TagColor = (task: string) => {
   if (task == "Delivered") {
-    return { color: '#9bf69c', textColor: '#313131', borderColor: '#ffffff' }
+    return {color: '#9bf69c', textColor: '#313131', borderColor: '#ffffff'}
   }
   if (task == "Deliverable") {
-    return { color: '#cbd0f1', textColor: '#000000', borderColor: '#ffffff' }
+    return {color: '#cbd0f1', textColor: '#000000', borderColor: '#ffffff'}
   }
-  return { color: '#b20000', textColor: '#ffffff', borderColor: '#ffffff' }
+  return {color: '#b20000', textColor: '#ffffff', borderColor: '#ffffff'}
 };
 const notification = useNotification();
-const notify =(type: NotificationType,title:string,message:string)=> {
+const notify = (type: NotificationType, title: string, message: string) => {
   notification[type]({
     content: message,
     title,
@@ -45,26 +47,26 @@ const notify =(type: NotificationType,title:string,message:string)=> {
   })
 }
 
-const TagIcon = (task:string) => {
+const TagIcon = (task: string) => {
   if (task == "Delivered") {
     return Delivery
   }
   if (task == "Deliverable") {
     return Send
-  } else{
+  } else {
     return EyeOutline
   }
 };
 
-const FormatDate = (date:string) =>{
-  return moment(date).format('DD MMM hh:mm A')
+const FormatDate = (date: string) => {
+  return moment(date).format('DD MMM YY hh:mm A');
 }
 
-const formatTime = (time:string) => {
+const formatTime = (time: string) => {
   return moment(time, "HH:mm:ss").format("MMMM Do YYYY, h:mm:ss a")
 };
 const viewJobModel = ref(false);
-const drawRectaangle = (ctx, x, y, width, height,labelWidth,labelHeight, color,child=false) => {
+const drawRectaangle = (ctx, x, y, width, height, labelWidth, labelHeight, color, child = false) => {
   ctx.strokeStyle = color;
   ctx.lineWidth = 2;
 
@@ -74,10 +76,10 @@ const drawRectaangle = (ctx, x, y, width, height,labelWidth,labelHeight, color,c
   // Calculate the position for the width and height labels
   const widthLabelX = x + width / 2
   let widthLabelY = y + height - 5;
-  if(child){
-    widthLabelY = y -5;
+  if (child) {
+    widthLabelY = y - 5;
   }
-  const heightLabelX = x + width -20;
+  const heightLabelX = x + width - 20;
   const heightLabelY = y + height / 2;
 
   // Draw labels for width and height
@@ -90,33 +92,49 @@ const drawRectaangle = (ctx, x, y, width, height,labelWidth,labelHeight, color,c
 };
 
 const canvasRef = ref<HTMLCanvasElement>();
-const draw = (cutSheet:CutSheet) =>{
-  const canvas:HTMLCanvasElement = canvasRef.value as HTMLCanvasElement;
+const draw = (cutSheet: CutSheet) => {
+  const canvas: HTMLCanvasElement = canvasRef.value as HTMLCanvasElement;
   const ctx = canvas.getContext('2d');
-  const canvasWidth = canvas.width-20;
-  const canvasHeight = canvas.height-20;
-  const parent= {
+  const canvasWidth = canvas.width - 20;
+  const canvasHeight = canvas.height - 20;
+  const parent = {
     width: cutSheet.parentWidth,
     height: cutSheet.parentLength,
   }
-  const heightRatio = canvasHeight/parent.height;
-  const widthRatio = canvasWidth/parent.width;
+  const heightRatio = canvasHeight / parent.height;
+  const widthRatio = canvasWidth / parent.width;
   const child = {
     width: cutSheet.width,
     height: cutSheet.length,
   }
-  drawRectaangle(ctx, 20, 10, (parent.width-50) * widthRatio, (parent.height-50) * heightRatio,parent.width,parent.height, 'black');
-  drawRectaangle(ctx, 20, 10, (child.width-50) * widthRatio, (child.height-50)  * heightRatio,child.width,child.height, 'red',true);
+  drawRectaangle(ctx, 20, 10, (parent.width - 50) * widthRatio, (parent.height - 50) * heightRatio, parent.width, parent.height, 'black');
+  drawRectaangle(ctx, 20, 10, (child.width - 50) * widthRatio, (child.height - 50) * heightRatio, child.width, child.height, 'red', true);
 }
 const sheetStore = useSheetStore();
-const currentJob =ref<Job>();
-const viewSelectedJob = (job:Job) =>{
+const currentJob = ref<Job>();
+const viewSelectedJob = (job: Job) => {
   currentJob.value = job;
   viewJobModel.value = true;
 }
 const markAsCollectableModal = ref(false);
 
-const markAsCollectable = (job:Job)=>{
+const pastJob = computed(() => {
+  const jobs = useJobStore().getDeliveredJobs;
+  if (monthToSort.value) {
+    const filteredJobs = [];
+    for (const job of jobs) {
+      const jobDate = moment(job.createdTime).format("YYYY-MM")
+      const filterDate = moment(monthToSort.value).format("YYYY-MM")
+      if (jobDate === filterDate) {
+        filteredJobs.push(job)
+      }
+    }
+    return filteredJobs;
+  }
+  return jobs;
+})
+
+const markAsCollectable = (job: Job) => {
   markAsCollectableModal.value = true;
   currentJob.value = job;
 }
@@ -124,10 +142,10 @@ const confirmation = ref({
   employeeID: null,
   pin: "",
   remarks: "",
-  currentTask:{} as Task
+  currentTask: {} as Task
 })
 
-const clearConfirmation = ()=>{
+const clearConfirmation = () => {
   confirmation.value.employeeID = null
   confirmation.value.pin = ""
   confirmation.value.remarks = ""
@@ -138,7 +156,7 @@ const clearConfirmation = ()=>{
   floorDetails.value.floorY2 = 0
 }
 
-const Employees =computed(()=>{
+const Employees = computed(() => {
   const outEmployee = useAdminStore().getOutEmployees;
   console.log(outEmployee)
   const employees = [];
@@ -158,21 +176,21 @@ const floorDetails = ref({
   floorY2: 0,
 })
 
-const MarkAsDeliverable =()=>{
+const MarkAsDeliverable = () => {
   if (floorDetails.value.floorX1 == 0 || floorDetails.value.floorY1 == 0 || floorDetails.value.floorX2 == 0 || floorDetails.value.floorY2 == 0) {
-    notify("error","Error","Please select the floor area")
+    notify("error", "Error", "Please select the floor area")
   }
-  if (confirmation.value.employeeID === null || confirmation.value.employeeID === ""){
-    notify("warning","Warning","Please Select your user Name")
+  if (confirmation.value.employeeID === null || confirmation.value.employeeID === "") {
+    notify("warning", "Warning", "Please Select your user Name")
     return;
   }
-  if (confirmation.value.pin.length < 4){
-    notify("warning","Warning","Please Enter Valid PIN")
+  if (confirmation.value.pin.length < 4) {
+    notify("warning", "Warning", "Please Enter Valid PIN")
     return;
   }
 
-  if (!compareText(confirmation.value.pin,useAdminStore().getUser(confirmation.value.employeeID).userPIN)){
-    notify("warning","Warning","Please Enter Valid PIN")
+  if (!compareText(confirmation.value.pin, useAdminStore().getUser(confirmation.value.employeeID).userPIN)) {
+    notify("warning", "Warning", "Please Enter Valid PIN")
     return;
   }
 
@@ -183,32 +201,27 @@ const MarkAsDeliverable =()=>{
     floorY2: floorDetails.value.floorY2,
   }
 
-  useJobStore().completeJob(currentJob.value.jobID,floorArea)
+  useJobStore().completeJob(currentJob.value.jobID, floorArea)
   markAsCollectableModal.value = false;
 
 }
 
-const sortTask = (tasks:Record<string,Task>)=>{
-  const taskOrder = ["PlateWriting", "PlateExposure", "PlateWashing", "PlateDrying", "PlateFinishing"];
-  const sortedTasks:Task[] = [];
-  Object.keys(tasks).forEach((taskType)=>{
-    sortedTasks[taskOrder.indexOf(taskType)] = tasks[taskType];
-  })
-  return sortedTasks;
+const filterJob = ()=>{
+
 }
 
-const elapsedTime = (startTime:string,endTime:string)=>{
-  console.log(startTime,endTime)
-  if (endTime.toString().trim() === ""){
-    return moment.utc(moment().diff(moment(startTime,"HH:mm:ss"))).format("HH:mm:ss")
+const elapsedTime = (startTime: string, endTime: string) => {
+  console.log(startTime, endTime)
+  if (endTime.toString().trim() === "") {
+    return moment.utc(moment().diff(moment(startTime, "HH:mm:ss"))).format("HH:mm:ss")
   }
-  return moment.utc(moment(endTime,"HH:mm:ss").diff(moment(startTime,"HH:mm:ss"))).format("HH:mm:ss")
+  return moment.utc(moment(endTime, "HH:mm:ss").diff(moment(startTime, "HH:mm:ss"))).format("HH:mm:ss")
 }
-
+const monthToSort = ref(Date.now());
 </script>
 
 <template>
-  <OutEmployeeLayout>
+  <OwnerLayout>
     <n-modal
         v-model:show="viewJobModel"
         :on-after-enter="()=>{draw(sheetStore.getCutSheet(currentJob.jobID))}"
@@ -221,12 +234,12 @@ const elapsedTime = (startTime:string,endTime:string)=>{
           :bordered="false"
           class="rounded-2xl"
           :body-style="{ padding: '0px' }"
-          :style="{ width: '80%' }"
+          :style="{ width: '60%' }"
       >
         <template #header>
-          <div class="flex items-center justify-center w-full gap-2">
+          <div class="flex flex-col items-center justify-center w-full gap-2">
             <div class="flex items-center justify-center gap-2">
-              <n-icon :component="DocumentTextOutline" size="large" />
+              <n-icon :component="DocumentTextOutline" size="large"/>
               <n-text class="text-xl">Job Details</n-text>
             </div>
           </div>
@@ -237,10 +250,10 @@ const elapsedTime = (startTime:string,endTime:string)=>{
                     class="w-8 h-8 flex items-center justify-center cursor-pointer hover:bg-red-500 hover:text-white hover:rounded-full p-1"/>
           </div>
         </template>
-
+        <n-divider/>
         <div class="flex gap-4">
           <div class="flex w-2/3 full gap-2 flex-col">
-            <div class="flex w-full gap-2  border-2 rounded-2xl">
+            <div class="flex border-solid w-full gap-2 border-blue-700 border rounded-2xl">
               <div class="flex w-1/2 flex-col gap-2 p-2">
                 <div class="text-xl font-bold text-center mb-3">
                   Job Details
@@ -251,7 +264,7 @@ const elapsedTime = (startTime:string,endTime:string)=>{
                       Job Name :
                     </div>
                     <div class="flex w-3/4 items-center justify-start px-2">
-                      {{currentJob.jobName}}
+                      {{ currentJob.jobName }}
                     </div>
                   </div>
                   <div class="flex">
@@ -259,7 +272,7 @@ const elapsedTime = (startTime:string,endTime:string)=>{
                       Job ID :
                     </div>
                     <div class="flex w-3/4 items-center justify-start px-2">
-                      {{currentJob.jobID}}
+                      {{ currentJob.jobID }}
                     </div>
                   </div>
                   <div class="flex">
@@ -267,7 +280,7 @@ const elapsedTime = (startTime:string,endTime:string)=>{
                       Job Status :
                     </div>
                     <div class="flex w-3/4 items-center justify-start px-2">
-                      {{currentJob.currentStatus}}
+                      {{ currentJob.currentStatus }}
                     </div>
                   </div>
                   <div class="flex">
@@ -275,7 +288,7 @@ const elapsedTime = (startTime:string,endTime:string)=>{
                       Created Time :
                     </div>
                     <div class="flex w-3/4 items-center justify-start px-2">
-                      {{FormatDate(currentJob.createdTime)}}
+                      {{ FormatDate(currentJob.createdTime) }}
                     </div>
                   </div>
 
@@ -291,7 +304,7 @@ const elapsedTime = (startTime:string,endTime:string)=>{
                       Sheet ID :
                     </div>
                     <div class="flex w-3/4 items-center justify-start px-2">
-                      {{currentJob.sheetID}}
+                      {{ currentJob.sheetID }}
                     </div>
                   </div>
                   <div class="flex">
@@ -299,7 +312,7 @@ const elapsedTime = (startTime:string,endTime:string)=>{
                       Thickness :
                     </div>
                     <div class="flex w-3/4 items-center justify-start px-2">
-                      {{sheetStore.getSheet(currentJob.sheetID).thickness}}mm
+                      {{ sheetStore.getSheet(currentJob.sheetID).thickness }}mm
                     </div>
                   </div>
                   <div class="flex">
@@ -307,7 +320,7 @@ const elapsedTime = (startTime:string,endTime:string)=>{
                       Length :
                     </div>
                     <div class="flex w-3/4 items-center justify-start px-2">
-                      {{sheetStore.getCutSheet(currentJob.jobID).parentLength }} mm
+                      {{ sheetStore.getCutSheet(currentJob.jobID).parentLength }} mm
                     </div>
                   </div>
                   <div class="flex">
@@ -315,13 +328,15 @@ const elapsedTime = (startTime:string,endTime:string)=>{
                       Width :
                     </div>
                     <div class="flex w-3/4 items-center justify-start px-2">
-                      {{sheetStore.getCutSheet(currentJob.jobID).parentWidth }} mm
+                      {{ sheetStore.getCutSheet(currentJob.jobID).parentWidth }} mm
                     </div>
                   </div>
+
+
                 </div>
               </div>
             </div>
-            <div class="flex w-full justify-center items-center border-2 rounded-2xl">
+            <div class="flex border-solid border-blue-700 w-full justify-center items-center border rounded-2xl">
               <div class="flex w-1/2 flex-col gap-2 p-2">
                 <div class="text-xl font-bold text-center mb-3">
                   Cut Details
@@ -332,7 +347,7 @@ const elapsedTime = (startTime:string,endTime:string)=>{
                       Width :
                     </div>
                     <div class="flex w-3/4 items-center justify-start px-2">
-                      {{currentJob.width}}mm
+                      {{ currentJob.width }}mm
                     </div>
                   </div>
                   <div class="flex">
@@ -340,7 +355,7 @@ const elapsedTime = (startTime:string,endTime:string)=>{
                       Length :
                     </div>
                     <div class="flex w-3/4 items-center justify-start px-2">
-                      {{currentJob.length}}mm
+                      {{ currentJob.length }}mm
                     </div>
                   </div>
                   <div class="flex">
@@ -348,7 +363,7 @@ const elapsedTime = (startTime:string,endTime:string)=>{
                       Remarks :
                     </div>
                     <div class="flex w-3/4 items-center justify-start px-2">
-                      {{currentJob.remarks ?? "No Remarks"}}
+                      {{ currentJob.remarks ?? "No Remarks" }}
                     </div>
                   </div>
                   <div class="flex">
@@ -356,7 +371,7 @@ const elapsedTime = (startTime:string,endTime:string)=>{
                       Priority :
                     </div>
                     <div class="flex w-3/4 items-center justify-start px-2">
-                      {{currentJob.priority ?? "Normal"}}
+                      {{ currentJob.priority ?? "Normal" }}
                     </div>
                   </div>
 
@@ -370,7 +385,7 @@ const elapsedTime = (startTime:string,endTime:string)=>{
               <div class="flex gap-2 flex-col">
                 <n-table single-column :single-line="false">
                   <thead>
-                  <tr>
+                  <tr class="text-center">
                     <th>No</th>
                     <th>Task Name</th>
                     <th>Elapsed Time</th>
@@ -379,17 +394,19 @@ const elapsedTime = (startTime:string,endTime:string)=>{
                   </tr>
                   </thead>
                   <tbody class="text-center">
-                  <tr v-for="(task,index) in sortTask(currentJob.tasks)" :key="task.taskID" v-if="currentJob.tasks">
-                    <td>#{{index+1}}</td>
-                    <td>{{task.taskType}}</td>
+                  <tr v-for="(task,index) in currentJob.tasks" :key="task.taskID" v-if="currentJob.tasks">
+                    <td>#{{ Object.keys(currentJob.tasks).indexOf(task.taskType) + 1 }}</td>
+                    <td>{{ task.taskType }}</td>
                     <td>
                       <n-tag :type="task.finishedTime.toString().trim()===''? 'info' :'success'">
-                        {{elapsedTime(FormatDate(task.startedTime),FormatDate(task.finishedTime))}}
+                        {{
+                          elapsedTime(FormatDate(task.startedTime), FormatDate(task.finishedTime))
+                        }}
                       </n-tag>
                     </td>
-                    <td>{{FormatDate(task.startedTime)}}</td>
+                    <td>{{ FormatDate(task.startedTime) }}</td>
                     <td>
-                      {{task.finishedTime.toString().trim()===""? "-" : FormatDate(task.finishedTime.toString())    }}
+                      {{ task.finishedTime.toString().trim() === "" ? "-" : FormatDate(task.finishedTime.toString()) }}
                     </td>
                   </tr>
                   <tr v-else>
@@ -400,8 +417,9 @@ const elapsedTime = (startTime:string,endTime:string)=>{
               </div>
             </div>
           </div>
-          <div class="flex w-1/3 p-6">
-            <canvas id="canvasElement" ref="canvasRef" class="border" width="400" height="600"></canvas>
+          <div class="flex justify-center items-start w-1/3 p-6">
+            <canvas id="canvasElement" ref="canvasRef" class="border w-full max-h-[500px]" width="300" height="400">
+            </canvas>
           </div>
 
         </div>
@@ -424,14 +442,15 @@ const elapsedTime = (startTime:string,endTime:string)=>{
         <template #header>
           <div class="flex items-center justify-center w-full gap-2">
             <div class="flex items-center justify-center gap-2">
-              <n-icon :component="DocumentTextOutline" size="large" />
+              <n-icon :component="DocumentTextOutline" size="large"/>
               <n-text class="text-xl">Confirm Details</n-text>
             </div>
           </div>
         </template>
         <template #header-extra>
           <div class="flex items-center justify-center  w-full">
-            <n-icon :component="Close" size="large" @click="markAsCollectableModal=false"  class="w-8 h-8 flex items-center justify-center cursor-pointer hover:bg-red-500 hover:text-white hover:rounded-full p-1"/>
+            <n-icon :component="Close" size="large" @click="markAsCollectableModal=false"
+                    class="w-8 h-8 flex items-center justify-center cursor-pointer hover:bg-red-500 hover:text-white hover:rounded-full p-1"/>
           </div>
         </template>
 
@@ -441,44 +460,44 @@ const elapsedTime = (startTime:string,endTime:string)=>{
               <div class="flex font-bold w-2/3 items-center justify-center px-3">
                 User Name :
               </div>
-              <n-select v-model:value="confirmation.employeeID" :options="Employees" placeholder="Select Employee" />
+              <n-select v-model:value="confirmation.employeeID" :options="Employees" placeholder="Select Employee"/>
             </div>
             <div class="flex items-center justify-center">
               <div class="flex font-bold w-2/3 items-center justify-center px-3">
                 User PIN :
               </div>
-              <n-input v-model:value="confirmation.pin" placeholder="Enter User PIN" />
+              <n-input v-model:value="confirmation.pin" placeholder="Enter User PIN"/>
             </div>
 
             <div class="text-lg text-center font-bold mt-2">
-              <n-divider />
+              <n-divider/>
               Sheet Floor Details
-              <n-divider />
+              <n-divider/>
             </div>
 
             <div class="flex items-center justify-center">
               <div class="flex font-bold w-2/3 items-center justify-center px-3">
                 Floor X1 (mm) :
               </div>
-              <n-input-number class="w-full" v-model:value="floorDetails.floorX1" placeholder="Enter Floor X1" />
+              <n-input-number class="w-full" v-model:value="floorDetails.floorX1" placeholder="Enter Floor X1"/>
             </div>
             <div class="flex items-center justify-center">
               <div class="flex font-bold w-2/3 items-center justify-center px-3">
                 Floor Y1 (mm) :
               </div>
-              <n-input-number class="w-full" v-model:value="floorDetails.floorY1" placeholder="Enter Floor Y1" />
+              <n-input-number class="w-full" v-model:value="floorDetails.floorY1" placeholder="Enter Floor Y1"/>
             </div>
             <div class="flex items-center justify-center">
               <div class="flex font-bold w-2/3 items-center justify-center px-3">
                 Floor X2 (mm) :
               </div>
-              <n-input-number class="w-full" v-model:value="floorDetails.floorX2" placeholder="Enter Floor X2" />
+              <n-input-number class="w-full" v-model:value="floorDetails.floorX2" placeholder="Enter Floor X2"/>
             </div>
             <div class="flex items-center justify-center">
               <div class="flex font-bold w-2/3 items-center justify-center px-3">
                 Floor Y2 (mm) :
               </div>
-              <n-input-number class="w-full" v-model:value="floorDetails.floorY2" placeholder="Enter Floor Y2" />
+              <n-input-number class="w-full" v-model:value="floorDetails.floorY2" placeholder="Enter Floor Y2"/>
             </div>
           </div>
 
@@ -486,11 +505,14 @@ const elapsedTime = (startTime:string,endTime:string)=>{
 
         <template #footer>
           <div class="flex items-center justify-center gap-2">
-            <n-button class="flex items-center px-6 justify-around gap-6 bg-red-500 text-white rounded-lg p-2 hover:bg-red-600" @click="markAsCollectableModal=false">
+            <n-button
+                class="flex items-center px-6 justify-around gap-6 bg-red-500 text-white rounded-lg p-2 hover:bg-red-600"
+                @click="markAsCollectableModal=false">
               Cancel
             </n-button>
-            <n-button class="flex items-center px-6 justify-around gap-6 bg-blue-500 text-white rounded-lg p-2 hover:bg-blue-600"
-                    @click="MarkAsDeliverable">
+            <n-button
+                class="flex items-center px-6 justify-around gap-6 bg-blue-500 text-white rounded-lg p-2 hover:bg-blue-600"
+                @click="MarkAsDeliverable">
               Confirm
             </n-button>
 
@@ -498,51 +520,68 @@ const elapsedTime = (startTime:string,endTime:string)=>{
         </template>
       </n-card>
     </n-modal>
-    <div class="m-1 p-8 bg-white flex flex-col items-center  min-h-[95vh] ">
-      <div class="text-center pt-2 pb-8 w-full">
-        <span class="text-3xl font-bold">Finished Jobs</span>
+    <div class="m-1 p-8 bg-white  min-h-[95vh] ">
+      <div class="text-center pt-2 pb-2 w-full">
+        <span class="text-3xl font-bold">
+          Job History
+        </span>
       </div>
-      <n-table striped size="small" border="outer" class="w-[80%]">
-        <thead>
-        <tr class="text-center">
-          <th>Job ID</th>
-          <th>Sheet ID</th>
-          <th>Started Time</th>
-          <th>FinishedTime</th>
-          <th>Time Elapsed</th>
-          <th>Action</th>
-        </tr>
-        </thead>
-        <tbody class="text-center">
-        <tr v-for="job in useJobStore().getFinishedJobs" :key="job.jobID" v-if="useJobStore().getFinishedJobs.length > 0">
-          <td>{{job.jobID}}</td>
-          <td>{{job.sheetID}}</td>
-          <td>{{formatTime(job.createdTime)}}</td>
-          <td>{{formatTime(job.tasks.PlateFinishing.finishedTime)}}</td>
-          <td>
-            {{moment.utc(moment(job.tasks.PlateFinishing.finishedTime,"HH:mm:ss").diff(moment(job.createdTime,"HH:mm:ss"))).format("HH:mm:ss")}}
-          </td>
-          <td class="flex items-center justify-center gap-2">
-            <n-button class="bg-blue-50 hover:bg-blue-500 flex items-center justify-center gap-3 border border-blue-700 font-bold py-2 px-2 rounded-2xl hover:text-white" @click="markAsCollectable(job)">
-              <n-icon :component="Collections20Regular" size="medium" />
-              Mark as Collectable
-            </n-button>
-            <n-button
-              @click="viewSelectedJob(job)"
-                class="bg-green-50 hover:bg-green-500 flex items-center justify-center gap-3 border border-green-700 rounded-2xl hover:text-white font-bold py-2 px-2">
-              <n-icon :component="EyeOutline" size="small" />
-              View JOB
-            </n-button>
+      <div class="flex items-center justify-center my-6">
+        <div class="flex w-full items-center justify-center gap-4">
+          <div class="flex items-center justify-center gap-2">
+            <n-text class="text-xl font-bold">Filter By </n-text>
+          </div>
+          <n-date-picker v-model:value="monthToSort" type="month" clearable />
+          <n-button
+              class="flex items-center px-6 justify-around gap-6 bg-blue-500 text-white rounded-lg p-2 hover:bg-blue-600"
+              @click="filterJob">
+            Filter
+          </n-button>
+        </div>
+      </div>
+      <div style="height: 80vh" class="overflow-y-scroll relative">
+        <n-table striped size="small" border="outer" class="w-full">
+          <thead>
+          <tr class="text-center">
+            <th>Job ID</th>
+            <th>Sheet ID</th>
+            <th>Started Time</th>
+            <th>FinishedTime</th>
+            <th>Time Elapsed</th>
+            <th>Action</th>
+          </tr>
+          </thead>
+          <tbody class="text-center">
+          <tr v-for="job in pastJob" :key="job.jobID"
+              v-if="pastJob.length > 0">
+            <td>{{ job.jobID }}</td>
+            <td>{{ job.sheetID }}</td>
+            <td>{{ FormatDate(job.createdTime) }}</td>
+            <td>{{ FormatDate(job.tasks.PlateFinishing.finishedTime) }}</td>
+            <td>
+              {{
+                elapsedTime(FormatDate(job.createdTime), FormatDate(job.tasks.PlateFinishing.finishedTime))
+              }}
+            </td>
+            <td class="flex gap-2 items-center justify-center">
+              <n-button
+                  @click="viewSelectedJob(job)"
+                  class="bg-green-100 hover:bg-green-500 flex items-center justify-center gap-3 border border-green-700 rounded-2xl hover:text-white font-bold py-2 px-2">
+                <n-icon :component="EyeOutline" size="small"/>
+                View JOB
+              </n-button>
 
-          </td>
-        </tr>
-        <tr v-else>
-          <td colspan="6" class="text-center">No Finished Jobs</td>
-        </tr>
-        </tbody>
-      </n-table>
+            </td>
+          </tr>
+
+          <tr v-else>
+            <td colspan="6" class="text-center">No Finished Jobs</td>
+          </tr>
+          </tbody>
+        </n-table>
+      </div>
     </div>
-  </OutEmployeeLayout>
+  </OwnerLayout>
 </template>
 
 <style scoped>

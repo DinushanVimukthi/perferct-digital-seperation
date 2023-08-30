@@ -12,6 +12,10 @@ import IcRoundReportGmailerrorred from "@components/Icon/ReportIcon.vue";
 import LucideSettings from "@components/Icon/Setting.vue";
 import {useLoaderStore} from "@store/loaderStore.ts";
 
+onMounted(()=>{
+  const loaderStore = useLoaderStore();
+  loaderStore.setLoading(false);
+})
 interface SideBarLink {
   name: string;
   icon: any;
@@ -19,48 +23,19 @@ interface SideBarLink {
   toggle?: boolean;
   subLinks?: SideBarLink[];
 }
-onMounted(()=>{
-  const loaderStore = useLoaderStore();
-  loaderStore.setLoading(false);
-})
+
 const SideBarLinks:SideBarLink[] =
     [
+      // {
+      //   name: "Dashboard",
+      //   icon: LucideLayoutDashboard,
+      //   path: "/stockManager/dashboard"
+      // },
       {
-        name: "Jobs",
+        name: "Stock",
         icon: MingcuteTask2Line,
-        path: "/outEmp/ongoing",
-        toggle: true,
-        subLinks: [
-          {
-            name: "Pending Jobs",
-            icon: LucideList,
-            path: "/outEmp/pending"
-          },
-          {
-            name: "Ongoing Jobs",
-            icon: LucideClock,
-            path: "/outEmp/ongoing"
-          },
-
-          {
-            name: "Finished Jobs",
-            icon: EpFinished,
-            path: "/outEmp/finished"
-          }
-        ]
+        path: "/stockManager/stock",
       },
-      // {
-      //   name: "Report Issue",
-      //   icon: IcRoundReportGmailerrorred,
-      //   path: "/outEmp/reportIssue"
-      // },
-      // {
-      //   name: "Settings",
-      //   icon: LucideSettings,
-      //   path: "/outEmp/settings"
-      // },
-
-
     ]
 </script>
 
@@ -68,7 +43,7 @@ const SideBarLinks:SideBarLink[] =
   <div class="flex flex-row h-screen overflow-hidden bg-gray-100">
     <Sidebar class=" left-0 top-0 min-h-screen" :Links="SideBarLinks" />
     <div class="main-content w-full h-full p-1">
-      <Navbar title="Employee Dashboard" />
+      <Navbar title="Stock Manager Dashboard" />
       <div class="page-content h-full">
         <div class="container-fluid min-h-full">
           <slot />

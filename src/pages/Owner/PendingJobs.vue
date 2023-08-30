@@ -23,6 +23,7 @@ import {useSheetStore} from "@store/sheetStore.ts";
 import {useUserStore} from "@store/UserStore.ts";
 import {useAdminStore} from "@store/adminStore.ts";
 import {compareText} from "@/helper/Security.ts";
+import OwnerLayout from "@/Layout/OwnerLayout.vue";
 import moment from "moment/moment";
 
 const jobStore = useJobStore();
@@ -37,37 +38,22 @@ const notify =(type: NotificationType,title:string,message:string)=> {
     keepAliveOnHover: true
   })
 }
-
-
-const search = ref("");
-
-const JobStore = useJobStore();
-
-const finishedJob = ref([
-  {
-    "jobID": "Job_001",
-    "sheetID": "Sheet_001",
-    "submittedTime": "2023-07-14 08.45 AM",
-    "Priority": "High",
-    "Deadline": "2023-07-14 04.15 PM",
+const TagColor = (priority:string) => {
+  switch (priority) {
+    case "High":
+      return "error"
+    case "Medium":
+      return "warning"
+    case "Low":
+      return "success"
+    default:
+      return "info"
   }
-])
+};
 
-const selectedJob =ref(null);
+
+const selectedJob =ref();
 const viewJobModel = ref(false);
-const TakeJob = (job:Job) => {
-  console.log(job)
-  selectedJob.value = job;
-  viewJobModel.value = true;
-}
-
-const CancelJob = () => {
-  viewJobModel.value = false;
-}
-
-const clearSelectedJob = () => {
-  selectedJob.value = null;
-}
 
 const drawRectaangle = (ctx, x, y, width, height,labelWidth,labelHeight, color,child=false) => {
   ctx.strokeStyle = color;
@@ -114,49 +100,7 @@ const draw = (cutSheet:CutSheet) =>{
   drawRectaangle(ctx, 20, 15, (child.width-50) * widthRatio, (child.height-50)  * heightRatio,child.width,child.height, 'red',true);
 }
 
-const StartJob = () => {
-  if (confirmation.value.employeeID === null || confirmation.value.employeeID === ""){
-    notify("warning","Warning","Please Select your user Name")
-    return;
-  }
-  if (confirmation.value.pin.length < 4){
-    notify("warning","Warning","Please Enter Valid PIN")
-    return;
-  }
 
-  if (!compareText(confirmation.value.pin,useAdminStore().getUser(confirmation.value.employeeID).userPIN)){
-    notify("warning","Warning","Please Enter Valid PIN")
-    return;
-  }
-  const jobID = selectedJob.value.jobID;
-  const userStore = useUserStore();
-  const task:Task ={
-    finishedBy: "",
-    finishedTime: "",
-    remarks: confirmation.value.remarks,
-    startedBy: confirmation.value.employeeID,
-    startedTime: new Date().toUTCString(),
-    taskID: "Task_" + Math.random().toString(36).substr(2, 9),
-    taskType: "PlateWriting",
-  }
-  const tasks = jobStore.getTasks(jobID);
-  if (!tasks){
-
-    jobStore.updateJobStatus(jobID,"Processing");
-    jobStore.addJobTask(jobID,task);
-    userConfirmationModal.value = false;
-    viewJobModel.value = false;
-
-    notify("success","Success","Job Started Successfully")
-    return;
-  }else{
-    userConfirmationModal.value = false;
-    viewJobModel.value = false;
-    notify("warning","Warning","You have already started this job")
-  }
-}
-
-const userConfirmationModal = ref(false);
 
 const Employees =computed(()=>{
   const outEmployee = useAdminStore().getOutEmployees;
@@ -181,91 +125,76 @@ onMounted(()=>{
   useAdminStore().getAllUsers();
 })
 
-const sortJobs = (jobs:Job[]) => {
-  return jobs.sort((a,b)=>{
-    return parseInt(a.jobID.toString().split("_")[1]) - parseInt(b.jobID.toString().split("_")[1])
-  })
+const ViewJob = (job:Job) =>{
+  selectedJob.value = job;
+  viewJobModel.value = true;
 }
 
-const PriorityColor = (priority:string) => {
-  switch (priority) {
-    case "Normal":
-      return "success"
-    case "Urgent":
-      return "error"
-    case "High":
-      return "warning"
-    default:
-      return "info"
+const formatDate = (date: string) => {
+  return moment(date).format('DD MMM ');
+}
+
+const TimeElapsed = (time: string) => {
+  return moment(time).fromNow();
+}
+
+const getTask = (tasks) => {
+  const taskArray = [];
+  if(tasks){
+    for (const task of tasks) {
+      taskArray.push(task)
+    }
   }
-};
-
-const FormatDate = (date:string) =>{
-  return moment(date).format('DD MMM hh:mm A');
+  return taskArray;
 }
 
-const sJobs = ref<Job[]>(sortJobs(jobStore.getPendingJobs));
-const Jobs = computed(()=>{
-  const jobs = jobStore.getPendingJobs;
-  return sortJobs(jobs);
-})
 </script>
 
 <template>
-<OutEmployeeLayout>
+<OwnerLayout>
   <n-modal
       v-model:show="viewJobModel"
+      :on-after-enter="()=>{draw(sheetStore.getCutSheet(selectedJob.jobID))}"
       title="View Job"
+      :width="1000"
       :mask-closable="false"
       :closable="false"
-      :footer="false"
-      :on-after-enter="()=>{draw(sheetStore.getCutSheet(selectedJob.jobID))}"
-      :on-after-leave="clearSelectedJob"
-  >
+      :footer="false">
     <n-card
         :bordered="false"
         class="rounded-2xl"
         :body-style="{ padding: '0px' }"
-        :style="{ width: '60%' }"
+        :style="{ width: '80%' }"
     >
       <template #header>
         <div class="flex items-center justify-center w-full gap-2">
           <div class="flex items-center justify-center gap-2">
-            <n-icon :component="DocumentTextOutline" size="large" />
+            <n-icon :component="DocumentTextOutline" size="large"/>
             <n-text class="text-xl">Job Details</n-text>
           </div>
         </div>
       </template>
       <template #header-extra>
         <div class="flex items-center justify-center  w-full">
-          <n-icon :component="Close" size="large" @click="viewJobModel=false"  class="w-8 h-8 flex items-center justify-center cursor-pointer hover:bg-red-500 hover:text-white hover:rounded-full p-1"/>
+          <n-icon :component="Close" size="large" @click="viewJobModel=false"
+                  class="w-8 h-8 flex items-center justify-center cursor-pointer hover:bg-red-500 hover:text-white hover:rounded-full p-1"/>
         </div>
       </template>
 
-      <div class="flex w-full gap-4">
-        <div class="flex w-2/3 gap-2 flex-col">
-          <div class="flex w-full gap-2 border-2 rounded-2xl p-4">
-            <div class="flex w-1/2 flex-col gap-2 ">
+      <div class="flex gap-4">
+        <div class="flex w-2/3 full gap-2 flex-col">
+          <div class="flex w-full gap-2  border-2 rounded-2xl">
+            <div class="flex w-1/2 flex-col gap-2 p-2">
               <div class="text-xl font-bold text-center mb-3">
-                Basic Details
+                Job Details
               </div>
-              <div class="flex gap-2 flex-col">
-                <div class="flex">
-                  <div class="flex font-bold w-2/3 items-center justify-center px-3">
-                    Priority
-                  </div>
-                  <div class="flex w-3/4 items-center justify-start px-2">
-                    <n-tag :bordered="false" type="success">
-                      {{selectedJob.priority ?? "Normal"}}
-                    </n-tag>
-                  </div>
-                </div>
+              <div class="flex w-full gap-2 flex-col">
                 <div class="flex">
                   <div class="flex font-bold w-2/3 items-center justify-center px-3">
                     Job Name :
                   </div>
                   <div class="flex w-3/4 items-center justify-start px-2">
-                    {{selectedJob.jobName}}
+                    {{ selectedJob.jobName }}
                   </div>
                 </div>
                 <div class="flex">
@@ -273,7 +202,7 @@ const Jobs = computed(()=>{
                     Job ID :
                   </div>
                   <div class="flex w-3/4 items-center justify-start px-2">
-                    {{selectedJob.jobID}}
+                    {{ selectedJob.jobID }}
                   </div>
                 </div>
                 <div class="flex">
@@ -281,7 +210,7 @@ const Jobs = computed(()=>{
                     Job Status :
                   </div>
                   <div class="flex w-3/4 items-center justify-start px-2">
-                    {{selectedJob.currentStatus}}
+                    {{ selectedJob.currentStatus }}
                   </div>
                 </div>
                 <div class="flex">
@@ -289,28 +218,23 @@ const Jobs = computed(()=>{
                     Created Time :
                   </div>
                   <div class="flex w-3/4 items-center justify-start px-2">
-                    {{selectedJob.createdTime}}
+                    {{ formatDate(selectedJob.createdTime.toString()) }}
                   </div>
                 </div>
+
               </div>
             </div>
-            <div class="flex w-1/2 flex-col gap-2 ">
+            <div class="flex w-1/2 flex-col gap-2 p-2">
               <div class="text-xl font-bold text-center mb-3">
                 Sheet Details
               </div>
               <div class="flex gap-2 flex-col">
                 <div class="flex">
                   <div class="flex font-bold w-2/3 items-center justify-center px-3">
-                    Sheet :
+                    Sheet ID :
                   </div>
                   <div class="flex w-3/4 items-center justify-start px-2">
-                    <n-tag round :bordered="false" :type="sheetStore.getSheet(selectedJob.sheetID).balanceSheets ? 'info' : 'success'">
-                      {{sheetStore.getSheet(selectedJob.sheetID).balanceSheets ? "Balance Sheet" : "Normal Sheet"}}
-                      <template #icon>
-                        <n-icon :component="CheckmarkCircle" />
-                      </template>
-                    </n-tag>
-
+                    {{ selectedJob.sheetID }}
                   </div>
                 </div>
                 <div class="flex">
@@ -318,101 +242,129 @@ const Jobs = computed(()=>{
                     Thickness :
                   </div>
                   <div class="flex w-3/4 items-center justify-start px-2">
-                    {{sheetStore.getSheet(selectedJob.sheetID).thickness}} mm
+                    {{ sheetStore.getSheet(selectedJob.sheetID.toString()).thickness }}mm
                   </div>
                 </div>
                 <div class="flex">
                   <div class="flex font-bold w-2/3 items-center justify-center px-3">
-                    Dimension :
+                    Length :
                   </div>
                   <div class="flex w-3/4 items-center justify-start px-2">
-                    {{sheetStore.getSheet(selectedJob.sheetID).width}}mm x {{sheetStore.getSheet(selectedJob.sheetID).length}}mm
+                    {{ sheetStore.getCutSheet(selectedJob.jobID.toString()).parentLength }} mm
                   </div>
                 </div>
                 <div class="flex">
                   <div class="flex font-bold w-2/3 items-center justify-center px-3">
-                    Cut Length :
+                    Width :
                   </div>
                   <div class="flex w-3/4 items-center justify-start px-2">
-                    {{selectedJob.length}}mm
+                    {{ sheetStore.getCutSheet(selectedJob.jobID.toString()).parentWidth }} mm
                   </div>
                 </div>
-                <div class="flex">
-                  <div class="flex font-bold w-2/3 items-center justify-center px-3">
-                    Cut Width :
-                  </div>
-                  <div class="flex w-3/4 items-center justify-start px-2">
-                    {{selectedJob.width}}mm
-                  </div>
-                </div>
+
 
               </div>
             </div>
           </div>
-          <div class="flex w-full gap-2 border-2 rounded-2xl p-4">
-            <div class="flex w-1/2 flex-col">
+          <div class="flex w-full justify-center items-center border-2 rounded-2xl">
+            <div class="flex w-1/2 flex-col gap-2 p-2">
               <div class="text-xl font-bold text-center mb-3">
-                Download Design Files
+                Cut Details
               </div>
               <div class="flex w-full gap-2 flex-col">
-                <!-- Download -->
-                <div class="flex w-full gap-3 items-center justify-center">
-<!--                  <n-button class="flex items-center px-6 justify-around gap-6 bg-blue-500 text-white rounded-lg p-2">-->
-<!--                    <n-icon size="large" :component="Download" />-->
-<!--                    <div class="flex flex-col gap-1">-->
-<!--                      <div class="text-sm font-bold">-->
-<!--                        Download-->
-<!--                      </div>-->
-<!--                      <div class="text-xs">-->
-<!--                        Download the Design Files-->
-<!--                      </div>-->
-<!--                    </div>-->
-<!--                  </n-button>-->
-                  Not Available
+                <div class="flex">
+                  <div class="flex font-bold w-2/3 items-center justify-center px-3">
+                    Width :
+                  </div>
+                  <div class="flex w-3/4 items-center justify-start px-2">
+                    {{ selectedJob.width }}mm
+                  </div>
                 </div>
+                <div class="flex">
+                  <div class="flex font-bold w-2/3 items-center justify-center px-3">
+                    Length :
+                  </div>
+                  <div class="flex w-3/4 items-center justify-start px-2">
+                    {{ selectedJob.length }}mm
+                  </div>
+                </div>
+                <div class="flex">
+                  <div class="flex font-bold w-2/3 items-center justify-center px-3">
+                    Remarks :
+                  </div>
+                  <div class="flex w-3/4 items-center justify-start px-2">
+                    {{ selectedJob.remarks ?? "No Remarks" }}
+                  </div>
+                </div>
+                <div class="flex">
+                  <div class="flex font-bold w-2/3 items-center justify-center px-3">
+                    Priority :
+                  </div>
+                  <div class="flex w-3/4 items-center justify-start px-2">
+                    {{ selectedJob.priority ?? "Normal" }}
+                  </div>
+                </div>
+
               </div>
             </div>
-            <div class="flex w-1/2 flex-col">
+            <div class="flex w-1/2 flex-col gap-2 p-2">
               <div class="text-xl font-bold text-center mb-3">
-                Deadline
+                Deadline Details
               </div>
               <div class="flex w-full gap-2 flex-col">
-                <div class="flex w-full gap-3 items-center justify-center">
-                  <div class="flex items-center px-6 justify-around gap-6 rounded-lg p-2">
-                    <n-icon size="large" :component="Calendar" />
-                    <div class="flex flex-col gap-1">
-                      <div class="text-xs">
-                        {{selectedJob.deadline}}
-                        {{selectedJob.createdTime}}
-                      </div>
-                    </div>
+                <div class="flex items-center justify-center">
+                  <div class="flex font-bold w-2/3 items-center justify-center px-3">
+                    Date :
+                  </div>
+                  <div class="flex w-3/4 items-center justify-start px-2">
+                    {{ selectedJob.deadLine.toString() }}
                   </div>
                 </div>
               </div>
             </div>
-
+          </div>
+          <div class="flex flex-col gap-2 border-2 rounded-2xl p-4">
+            <div class="text-xl font-bold text-center mb-3">
+              Tasks
+            </div>
+            <div class="flex gap-2 flex-col">
+              <n-table single-column :single-line="false">
+                <thead>
+                <tr>
+                  <th>No</th>
+                  <th>Task Name</th>
+                  <th>Task Status</th>
+                  <th>Started Time</th>
+                  <th>Completed Time</th>
+                </tr>
+                </thead>
+                <tbody class="text-center">
+                <tr v-for="(task) in getTask(selectedJob.tasks)" :key="task.taskID" v-if="getTask(selectedJob.tasks).length>0">
+                  <td>#{{ Object.keys(selectedJob.tasks).indexOf(task.taskType) + 1 }}</td>
+                  <td>{{ task.taskType }}</td>
+                  <td>
+                    <n-tag :type="task.finishedTime.toString().trim()===''? 'info' :'success'">
+                      {{ task.finishedTime.toString().trim() === "" ? "In Progress" : task.finishedTime.toString() }}
+                    </n-tag>
+                  </td>
+                  <td>{{ FormatDate(task.startedTime.toString()) }}</td>
+                  <td>
+                    {{ task.finishedTime.toString().trim() === "" ? "-" : task.finishedTime.toString() }}
+                  </td>
+                </tr>
+                <tr v-else>
+                  <td colspan="5" class="text-center">No Tasks Yet</td>
+                </tr>
+                </tbody>
+              </n-table>
+            </div>
           </div>
         </div>
         <div class="flex w-1/3 p-6">
-          <canvas ref="canvasRef" class=" w-full" height="350">
-
-          </canvas>
+          <canvas id="canvasElement" ref="canvasRef" class="border" width="400" height="600"></canvas>
         </div>
 
       </div>
-
-      <template #footer>
-        <div class="flex items-center justify-center gap-2">
-          <n-button class="flex items-center px-6 justify-around gap-6 bg-red-500 text-white rounded-lg p-2 hover:bg-red-600" @click="CancelJob">
-            Cancel Job
-          </n-button>
-          <n-button class="flex items-center px-6 justify-around gap-6 bg-blue-500 text-white rounded-lg p-2 hover:bg-blue-600"
-                  @click="userConfirmationModal = true">
-              Start Job & Plate Writing
-          </n-button>
-
-        </div>
-      </template>
     </n-card>
   </n-modal>
   <n-modal
@@ -479,13 +431,13 @@ const Jobs = computed(()=>{
 
       <template #footer>
         <div class="flex items-center justify-center gap-2">
-          <n-button class="flex items-center px-6 justify-around gap-6 bg-red-500 text-white rounded-lg p-2 hover:bg-red-600" @click="userConfirmationModal=false">
+          <button class="flex items-center px-6 justify-around gap-6 bg-red-500 text-white rounded-lg p-2 hover:bg-red-600" @click="userConfirmationModal=false">
             Cancel
-          </n-button>
-          <n-button class="flex items-center px-6 justify-around gap-6 bg-blue-500 text-white rounded-lg p-2 hover:bg-blue-600"
+          </button>
+          <button class="flex items-center px-6 justify-around gap-6 bg-blue-500 text-white rounded-lg p-2 hover:bg-blue-600"
                   @click="StartJob">
               Confirm
-          </n-button>
+          </button>
 
         </div>
       </template>
@@ -512,30 +464,25 @@ const Jobs = computed(()=>{
         </tr>
         </thead>
         <tbody>
-        <tr v-for="job in Jobs" :key="job.jobID" v-if="jobStore.getPendingJobs.length > 0">
+        <tr v-for="job in jobStore.getPendingJobs" :key="job.jobID" v-if="jobStore.getPendingJobs.length > 0">
           <td>{{job.jobID}}</td>
           <td>{{job.sheetID}}</td>
           <td>{{job.createdTime}}</td>
           <td>
             <n-tag
-                :type="PriorityColor(job.priority)"
+                :type="TagColor(job.Priority)"
             >
             <span class="text-sm font-bold">
                 {{job.priority ?? "N/A"}}
               </span>
             </n-tag>
           </td>
-          <td>{{FormatDate(job.createdTime)}}</td>
+          <td>{{job.createdTime}}</td>
           <td class="flex items-center justify-center gap-2">
-            <n-button class="bg-green-200 hover:bg-white hover:text-black border hover:border hover:border-green-500 flex items-center justify-center gap-3 text-green-800 font-bold py-2 px-2 rounded"
-                      @click="TakeJob(job)">
+            <button class="bg-green-200 hover:bg-white hover:text-black border hover:border hover:border-green-500 flex items-center justify-center gap-3 text-green-800 font-bold py-2 px-2 rounded" @click="ViewJob(job)">
 <!--              <n-icon :component="Checkmark" size="large" />-->
-              Take Job
-            </n-button>
-<!--            <n-button class="bg-blue-200 text-blue-800 hover:bg-white border hover:text-black hover:border hover:border-green-500 flex items-center justify-center gap-3 font-bold py-2 px-2 rounded" disabled>-->
-<!--                <n-icon :component="Download" size="large" />-->
-<!--              Design-->
-<!--            </n-button>-->
+              View Job
+            </button>
           </td>
         </tr>
         <tr v-else>
@@ -546,6 +493,6 @@ const Jobs = computed(()=>{
     </div>
   </div>
 
-</OutEmployeeLayout>
+</OwnerLayout>
 </template>
 

@@ -19,9 +19,9 @@ const trigger = ref<boolean>(props.trigger);
   <h1>
     Modal
   </h1>
-  <button @click="trigger = !trigger">
+  <n-button @click="trigger = !trigger">
     Close
-  </button>
+  </n-button>
 </div>
 </template>
 

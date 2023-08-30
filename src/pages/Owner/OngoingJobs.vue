@@ -5,14 +5,15 @@ import {
   NTag,
   NIcon,
   NButton,
+  NPagination,
   NCard,
   NSelect,
   NText,
   NModal,
   NInput,
-  NResult,
+    NResult,
   useNotification,
-  NotificationType, NTable
+  NotificationType
 } from "naive-ui";
 import {computed, ref} from "vue";
 import {useJobStore} from "@store/jobStore.ts";
@@ -22,6 +23,7 @@ import {compareText} from "@/helper/Security.ts";
 import {CutSheet, Job, Task} from "@/types/Types.ts";
 import {Calendar, Download} from "@vicons/carbon";
 import {useSheetStore} from "@store/sheetStore.ts";
+import OwnerLayout from "@/Layout/OwnerLayout.vue";
 
 
 const notification = useNotification();
@@ -79,8 +81,6 @@ const getTaskName = (task) => {
       return "Drying"
     case "PlateFinishing":
       return "Finishing"
-    case "Completing":
-      return "Completing"
   }
 };
 
@@ -88,7 +88,7 @@ const getNextTask= (currentTask:string)=>{
   const taskOrder = ["PlateWriting", "PlateExposure", "PlateWashing", "PlateDrying", "PlateFinishing"];
   const currentTaskIndex = taskOrder.indexOf(currentTask);
   if (currentTaskIndex == taskOrder.length - 1) {
-    return "Completing"
+    return "PlateFinishing"
   } else {
     return taskOrder[currentTaskIndex + 1]
   }
@@ -235,24 +235,10 @@ const sheetStore = useSheetStore();
 const RefreshPage = () => {
   window.location.reload();
 }
-
-const FormatDate = (date:string) =>{
-  return moment(date).format('DD MMM hh:mm A');
-}
-
-const sortTask = (tasks)=>{
-  const taskOrder = ["PlateWriting", "PlateExposure", "PlateWashing", "PlateDrying", "PlateFinishing"];
-  const sortedTasks = [];
-  Object.keys(tasks).forEach((taskType)=>{
-    sortedTasks[taskOrder.indexOf(taskType)] = tasks[taskType];
-  })
-  return sortedTasks;
-}
-
 </script>
 
 <template>
-  <OutEmployeeLayout>
+  <OwnerLayout>
     <n-modal
         v-model:show="viewJobModel"
         title="View Job"
@@ -295,9 +281,7 @@ const sortTask = (tasks)=>{
                       Priority
                     </div>
                     <div class="flex w-3/4 items-center justify-start px-2">
-                      <n-tag :bordered="false"
-                              :type="selectedJob.priority === 'High' ? 'error' : selectedJob.priority === 'Normal' ? 'warning' : 'success'"
-                             >
+                      <n-tag :bordered="false" type="success">
                         {{selectedJob.priority ?? "Normal"}}
                       </n-tag>
                     </div>
@@ -308,6 +292,14 @@ const sortTask = (tasks)=>{
                     </div>
                     <div class="flex w-3/4 items-center justify-start px-2">
                       {{selectedJob.jobName}}
+                    </div>
+                  </div>
+                  <div class="flex">
+                    <div class="flex font-bold w-2/3 items-center justify-center px-3">
+                      Job ID :
+                    </div>
+                    <div class="flex w-3/4 items-center justify-start px-2">
+                      {{selectedJob.jobID}}
                     </div>
                   </div>
                   <div class="flex">
@@ -391,13 +383,17 @@ const sortTask = (tasks)=>{
                 <div class="flex w-full gap-2 flex-col">
                   <!-- Download -->
                   <div class="flex w-full gap-3 items-center justify-center">
-<!--                    <n-button class="flex items-center pl-2 justify-around gap-2 bg-blue-500 text-white rounded-lg p-2">-->
-<!--                      <template #icon>-->
-<!--                        <n-icon size="large" :component="Download" />-->
-<!--                      </template>-->
-<!--                          Download the Design Files-->
-<!--                    </n-button>-->
-                    Not Available
+                    <button class="flex items-center px-6 justify-around gap-6 bg-blue-500 text-white rounded-lg p-2">
+                      <n-icon size="large" :component="Download" />
+                      <div class="flex flex-col gap-1">
+                        <div class="text-sm font-bold">
+                          Download
+                        </div>
+                        <div class="text-xs">
+                          Download the Design Files
+                        </div>
+                      </div>
+                    </button>
                   </div>
                 </div>
               </div>
@@ -407,11 +403,12 @@ const sortTask = (tasks)=>{
                 </div>
                 <div class="flex w-full gap-2 flex-col">
                   <div class="flex w-full gap-3 items-center justify-center">
-                    <div class="flex items-center px-6 justify-around gap-6 rounded-lg p-2 text-lg bg-red-600 rounded-2xl px-4 py-2 text-white">
+                    <div class="flex items-center px-6 justify-around gap-6 rounded-lg p-2">
                       <n-icon size="large" :component="Calendar" />
                       <div class="flex flex-col gap-1">
-                        <div class="font-bold ">
-                          {{FormatDate(selectedJob.deadLine)}}
+                        <div class="text-xs">
+                          {{selectedJob.deadline}}
+                          {{selectedJob.createdTime}}
                         </div>
                       </div>
                     </div>
@@ -440,53 +437,18 @@ const sortTask = (tasks)=>{
 
             </canvas>
           </div>
-        </div>
-        <div class="flex flex-col gap-2 border-2 rounded-2xl p-4">
-          <div class="text-xl font-bold text-center mb-3">
-            Tasks
-          </div>
-          <div class="flex gap-2 flex-col">
-            <n-table single-column :single-line="false">
-              <thead>
-              <tr>
-                <th>No</th>
-                <th>Task Name</th>
-                <th>Task Status</th>
-                <th>Started Time</th>
-                <th>Completed Time</th>
-              </tr>
-              </thead>
-              <tbody class="text-center">
-              <tr v-for="(task,index) in sortTask(selectedJob.tasks)" :key="task.taskID" v-if="Object.keys(selectedJob.tasks ?? []).length>0">
-                <td>#{{index + 1 }}</td>
-                <td>{{ task.taskType }}</td>
-                <td>
-                  <n-tag :type="task.finishedTime.toString().trim()===''? 'info' :'success'">
-                    {{ task.finishedTime.toString().trim() === "" ? "In Progress" : "Completed" }}
-                  </n-tag>
-                </td>
-                <td>{{ FormatDate(task.startedTime.toString()) }}</td>
-                <td>
-                  {{ task.finishedTime.toString().trim() === "" ? "-" : FormatDate(task.finishedTime.toString()) }}
-                </td>
-              </tr>
-              <tr v-else>
-                <td colspan="5" class="text-center">No Tasks Yet</td>
-              </tr>
-              </tbody>
-            </n-table>
-          </div>
+
         </div>
 
         <template #footer>
           <div class="flex items-center justify-center gap-2">
-            <n-button type="error" class="flex items-center px-6 justify-around gap-6 bg-red-500 text-white rounded-lg p-2 hover:bg-red-600" @click="viewJobModel=false">
-              Close
-            </n-button>
-            <n-button class="flex items-center px-6 justify-around gap-6 bg-blue-500 text-white rounded-lg p-2 hover:bg-blue-600"
+            <button class="flex items-center px-6 justify-around gap-6 bg-red-500 text-white rounded-lg p-2 hover:bg-red-600" @click="CancelJob">
+              Cancel Job
+            </button>
+            <button class="flex items-center px-6 justify-around gap-6 bg-blue-500 text-white rounded-lg p-2 hover:bg-blue-600"
                     @click="userConfirmationModal = true">
               Start Job & Plate Writing
-            </n-button>
+            </button>
 
           </div>
         </template>
@@ -540,13 +502,13 @@ const sortTask = (tasks)=>{
 
         <template #footer>
           <div class="flex items-center justify-center gap-2">
-            <n-button class="flex items-center px-6 justify-around gap-6 bg-red-500 text-white rounded-lg p-2 hover:bg-red-600" @click="userConfirmationModal=false">
+            <button class="flex items-center px-6 justify-around gap-6 bg-red-500 text-white rounded-lg p-2 hover:bg-red-600" @click="userConfirmationModal=false">
               Cancel
-            </n-button>
-            <n-button class="flex items-center px-6 justify-around gap-6 bg-blue-500 text-white rounded-lg p-2 hover:bg-blue-600"
+            </button>
+            <button class="flex items-center px-6 justify-around gap-6 bg-blue-500 text-white rounded-lg p-2 hover:bg-blue-600"
                     @click="NextTask">
               Confirm
-            </n-button>
+            </button>
 
           </div>
         </template>
@@ -562,7 +524,7 @@ const sortTask = (tasks)=>{
           <!-- Priority Tag -->
           <div class="absolute mt-1 mr-1 top-0 right-0">
             <n-tag round :bordered="false" type="success">
-              {{ job.priority }}
+              {{ job.Priority }}N/A
             </n-tag>
           </div>
           <div class="flex flex-col items-center">
@@ -589,12 +551,12 @@ const sortTask = (tasks)=>{
               </div>
               <!-- Button -->
               <div class="flex flex-col mt-1">
-                <n-button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-2 rounded" @click="openUserConfirmationModal(job.jobID)">
-                  Start {{ getTaskName(getNextTask(useJobStore().getCurrentTask(job.jobID).taskType))}}
-                </n-button>
-                <n-button class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-2 rounded mt-2" @click="ViewJob(job)">
+                <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-2 rounded" @click="openUserConfirmationModal(job.jobID)">
+                  Finish {{ getTaskName(useJobStore().getCurrentTask(job.jobID).taskType)}}
+                </button>
+                <button class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-2 rounded mt-2" @click="ViewJob(job)">
                   View Job
-                </n-button>
+                </button>
               </div>
             </div>
           </div>
@@ -614,16 +576,16 @@ const sortTask = (tasks)=>{
           </div>
           <template #footer>
             <div class="flex items-center justify-center gap-2">
-              <n-button class="flex items-center px-6 justify-around gap-6 bg-blue-500 text-white rounded-lg p-2 hover:bg-blue-600"
+              <button class="flex items-center px-6 justify-around gap-6 bg-blue-500 text-white rounded-lg p-2 hover:bg-blue-600"
                       @click="RefreshPage">
                 Refresh
-              </n-button>
+              </button>
             </div>
           </template>
         </n-result>
       </div>
     </div>
-  </OutEmployeeLayout>
+  </OwnerLayout>
 </template>
 
 <style scoped>

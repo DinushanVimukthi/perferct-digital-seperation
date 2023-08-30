@@ -1,5 +1,67 @@
 <script setup lang="ts">
 
+import {useUserStore} from "@store/UserStore.ts";
+import {NotificationType, useNotification,NInput,NButton} from "naive-ui";
+import {ref} from "vue";
+import router from "@/router"
+import { } from "firebase/auth"
+import {useLoaderStore} from "@store/loaderStore.ts";
+
+
+const notification = useNotification();
+const notify =(type: NotificationType,title:string,message:string)=> {
+  notification[type]({
+    content: message,
+    title,
+    duration: 2500,
+    keepAliveOnHover: true
+  })
+}
+const loginForm = ref({
+  email: 'stdinushan@gmail.com',
+  password: '12345678'
+})
+
+const userStore = useUserStore();
+
+const login =async () => {
+  // Validate form
+  if (loginForm.value.email.trim() === '' || loginForm.value.password.trim() === '') {
+    notify('error','Error','Please fill all fields');
+    return;
+  }
+  const loaderStore = useLoaderStore();
+  loaderStore.setLoading(true);
+  const result = await userStore.logUser(loginForm.value.email,loginForm.value.password);
+  if (result.success){
+    const userRole = result.userRole
+    console.log(userRole)
+
+    let path = ''
+    if (userRole === 'InEmployee'){
+      path +='/inEmp/dashboard'
+    }else if (userRole === 'OutEmployee'){
+      path +='/outEmp/pending'
+    }else if (userRole === 'StockManager') {
+      path +='/stockManager/dashboard'
+    }else if (userRole === 'Admin') {
+      path +='/owner/dashboard'
+    }
+    router.push(path)
+    notify('success','Success','Logged in successfully');
+  }else{
+    console.log(result)
+    const error = result.error
+    if (error.code === 'auth/user-not-found'){
+      notify('error','Error','User not found');
+    }else if (error.code === 'auth/wrong-password'){
+      notify('error','Error','Incorrect password');
+    } else{
+      notify('error','Error','Something went wrong');
+    }
+}
+}
+
 </script>
 
 <template>
@@ -10,23 +72,27 @@
       </div>
       <div class="w-1/2 h-full flex flex-col items-center justify-center gap-2">
         <div class="bg-white h-3/4 w-8/12 rounded-3xl shadow-lg p-8">
-          <form class="flex flex-col h-5/6 justify-center">
+          <form class="flex flex-col h-5/6 justify-center" @submit.prevent="login">
             <h2 class="text-3xl font-semibold mb-6 text-center">
-              Sign In
+              Sign In 
             </h2>
             <div class="mb-4">
-              <label class="block text-gray-700 text-sm font-bold mb-2" for="email">User Name :</label>
-              <input type="email" id="email" name="email" class="w-full px-3 py-2 border-b-2 border-gray-300 focus:outline-none focus:border-blue-300 transition-colors duration-300" placeholder="Enter your email">
+              <label class="block text-gray-700 text-sm font-bold mb-2" for="email">User Email :</label>
+              <n-input type="text" id="email" name="email" class="w-full border-b-2 border-gray-300 focus:outline-none focus:border-blue-300 transition-colors duration-300" placeholder="Enter your email" v-model:value="loginForm.email"/>
             </div>
             <div class="mb-6">
               <label class="block text-gray-700 text-sm font-bold mb-2" for="password">Password:</label>
-              <input type="password" id="password" name="password" class="w-full px-3 py-2 border-b-2 border-gray-300 focus:outline-none focus:border-blue-300 transition-colors duration-300" placeholder="Enter your password">
+              <n-input type="password" id="password" name="password" class="w-full border-b-2 border-gray-300 focus:outline-none focus:border-blue-300 transition-colors duration-300" placeholder="Enter your password" v-model:value="loginForm.password"/>
             </div>
 <!--            <div class="flex items-center justify-end">-->
 <!--              <a href="#" class="text-blue-500 hover:underline">Forgot password?</a>-->
 <!--            </div>-->
             <div class="flex items-center justify-center">
-              <button type="submit" class="bg-gradient-to-r bg-blue-700 hover:from-blue-600 hover:to-purple-700 w-full text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline transition-colors duration-300">Login</button>
+              <n-button
+                  @click="login"
+                  class="bg-gradient-to-r bg-blue-700 hover:from-blue-600 hover:text-white hover:to-purple-700 w-full text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline transition-colors duration-300">
+                Login
+              </n-button>
             </div>
           </form>
         </div>

@@ -2,11 +2,11 @@
 
 
 import MdiChevronDown from "@components/Icon/chevronDown.vue";
-import {ref} from "vue";
+import {ref, shallowRef} from "vue";
 import LucideChevronUp from "@components/Icon/chevronUp.vue";
 
 import {useRouter} from "vue-router";
-import {SideBarLink} from "@types/SideBar.ts";
+import {SideBarLink} from "@type/SideBar.ts";
 
 const router = useRouter();
 
@@ -17,7 +17,7 @@ const props=defineProps({
   }
 })
 
-const SidebarLinks = ref<SideBarLink[]>(props.Links);
+const SidebarLinks = shallowRef<SideBarLink[]>(props.Links);
 
 
 const Redirect = (path: string) => {

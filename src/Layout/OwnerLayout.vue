@@ -4,18 +4,14 @@ import Sidebar from "@components/Sidebar.vue";
 import Navbar from "@components/Navbar.vue";
 import LucideLayoutDashboard from "@components/Icon/Dashboard.vue";
 import MingcuteTask2Line from "@components/Icon/Task.vue";
-import LucideList from "@components/Icon/ListIcon.vue";
-import LucideClock from "@components/Icon/Clock.vue";
-import EpFinished from "@components/Icon/Finish.vue";
-import IcRoundReportGmailerrorred from "@components/Icon/ReportIcon.vue";
-import FluentCollections24Regular from "@components/Icon/Collectable.vue";
 import LucideSettings from "@components/Icon/Setting.vue";
 import {SideBarLink} from "@/types/SideBar.ts";
-import {onMounted, shallowRef} from "vue";
+import {Users,Dashboard,Settings,ReportAnalytics,ClipboardList,Activity,BrandStackoverflow,Clock} from "@vicons/tabler";
+import {onMounted} from "vue";
 import {useLoaderStore} from "@store/loaderStore.ts";
-
+import LucideClock from "@components/Icon/Clock.vue";
+import FluentCollections24Regular from "@components/Icon/Collectable.vue";
 onMounted(()=>{
-  const loaderStore = useLoaderStore();
   setTimeout(()=>{
     const loaderStore = useLoaderStore();
     loaderStore.setLoading(false);
@@ -26,28 +22,43 @@ const SideBarLinks:SideBarLink[] =
     [
       {
         name: "Dashboard",
-        icon: LucideLayoutDashboard,
-        path: "/inEmp/dashboard"
+        icon: Dashboard,
+        path: "/owner/dashboard"
+      },
+      {
+        name: "Manage User",
+        icon: Users,
+        path: "/owner/manageUser",
       },
       {
         name: "Jobs",
-        icon: MingcuteTask2Line,
-        path: "/inEmp/ongoing",
+        icon: ClipboardList,
+        path: "/owner/ongoing",
         toggle: true,
         subLinks: [
           {
             name: "Current Jobs",
-            icon: LucideClock,
-            path: "/inEmp/current"
+            icon: Activity,
+            path: "/owner/currentJob"
           },
           {
             name: "Collectable",
-            icon: FluentCollections24Regular,
-            path: "/inEmp/collectable"
+            icon: BrandStackoverflow,
+            path: "/owner/collectable"
           },
+            {
+            name: "Past",
+            icon: Clock,
+            path: "/owner/history"
+          },
+
         ]
       },
-
+      //   {
+      //   name: "Reports",
+      //   icon: ReportAnalytics,
+      //   path: "/owner/report",
+      // },
 
     ]
 </script>
@@ -56,7 +67,7 @@ const SideBarLinks:SideBarLink[] =
   <div class="flex flex-row h-screen overflow-hidden bg-gray-100">
     <Sidebar class=" left-0 top-0 min-h-screen" :Links="SideBarLinks" />
     <div class="main-content w-full h-full p-1">
-      <Navbar title="Employee Dashboard" />
+      <Navbar title="Admin Dashboard" />
       <div class="page-content h-full">
         <div class="container-fluid h-[93%]">
           <slot />

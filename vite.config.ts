@@ -16,5 +16,8 @@ export default defineConfig({
         "@type": "/src/types",
         "@Layout": "/src/Layout",
     }
-  }
+  },
+    server: {
+        port : 3000,
+    }
 })

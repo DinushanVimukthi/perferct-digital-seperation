@@ -54,11 +54,11 @@ const SideBarLinks:SideBarLink[] =
 
         ]
       },
-      //   {
-      //   name: "Reports",
-      //   icon: ReportAnalytics,
-      //   path: "/owner/report",
-      // },
+        {
+        name: "Sheets",
+        icon: ReportAnalytics,
+        path: "/owner/report",
+      },
 
     ]
 </script>

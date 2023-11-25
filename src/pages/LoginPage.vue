@@ -18,8 +18,8 @@ const notify =(type: NotificationType,title:string,message:string)=> {
   })
 }
 const loginForm = ref({
-  email: 'stdinushan@gmail.com',
-  password: '12345678'
+  email: '',
+  password: ''
 })
 
 const userStore = useUserStore();
@@ -59,6 +59,7 @@ const login =async () => {
     } else{
       notify('error','Error','Something went wrong');
     }
+    loaderStore.setLoading(false);
 }
 }
 

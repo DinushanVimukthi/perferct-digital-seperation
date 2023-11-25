@@ -163,8 +163,8 @@ onMounted(async () => {
               <span class="text-5xl text-green-600 font-bold">
             {{ useSheetStore().getAllSheetsForJobs.length}}
           </span>
-            <div class="text-sm text-green-500">
-              No of Sheets
+            <div class="text-sm text-center text-green-500">
+              No of Sheets <br> ( Balance + Full )
             </div>
 
           </div>

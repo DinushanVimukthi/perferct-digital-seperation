@@ -145,6 +145,12 @@ const confirmation = ref({
   currentTask: {} as Task
 })
 
+const timeDifference = (startTime:string,endTime:string)=>{
+  const endTimes =  new Date(endTime);
+  const startTimes =  new Date(startTime);
+  return moment.utc(moment(endTimes).diff(moment(startTimes))).format("HH:mm:ss")
+}
+
 const clearConfirmation = () => {
   confirmation.value.employeeID = null
   confirmation.value.pin = ""
@@ -234,7 +240,7 @@ const monthToSort = ref(Date.now());
           :bordered="false"
           class="rounded-2xl"
           :body-style="{ padding: '0px' }"
-          :style="{ width: '60%' }"
+          :style="{ width: '90%' }"
       >
         <template #header>
           <div class="flex flex-col items-center justify-center w-full gap-2">
@@ -400,7 +406,7 @@ const monthToSort = ref(Date.now());
                     <td>
                       <n-tag :type="task.finishedTime.toString().trim()===''? 'info' :'success'">
                         {{
-                          elapsedTime(FormatDate(task.startedTime), FormatDate(task.finishedTime))
+                          timeDifference(FormatDate(task.startedTime), FormatDate(task.finishedTime))
                         }}
                       </n-tag>
                     </td>

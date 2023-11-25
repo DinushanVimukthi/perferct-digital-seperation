@@ -176,6 +176,7 @@ const addUser = async ()=>{
   addUserModal.value = false;
   notificationModalProps.value.title = "Your PIN is "+userPin;
   notificationModalProps.value.description = "Please use this PIN to use the system. Do not share this PIN with anyone";
+  notify("success","Success","User Added Successfully & Logging to new Account ");
 }
 
 

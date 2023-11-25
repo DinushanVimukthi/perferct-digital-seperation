@@ -102,6 +102,10 @@ const formatTime = (time:string) => {
   return moment(time, "HH:mm:ss").format("hh:mm A");
 };
 
+const formatDateTime = (time:string) => {
+  return moment(time).format("DD MMM hh:mm A");
+};
+
 const Employees =computed(()=>{
   const outEmployee = useAdminStore().getOutEmployees;
   console.log(outEmployee)
@@ -126,6 +130,7 @@ const confirmation = ref({
 })
 
 const openUserConfirmationModal = (jobID:string)=>{
+  viewJobModel.value = false
   selectedJobID.value = jobID
   userConfirmationModal.value = true
   confirmation.value.currentTask = useJobStore().getCurrentTask(jobID)
@@ -144,7 +149,6 @@ const NextTask = ()=>{
     notify("warning","Warning","Please Enter Valid PIN")
     return;
   }
-  console.log(confirmation.value.currentTask)
   const nextTask = getNextTask(confirmation.value.currentTask.taskType)
   useJobStore().finishTask(selectedJobID.value,confirmation.value.currentTask.taskType,confirmation.value.employeeID)
   const task:Task ={
@@ -240,6 +244,10 @@ const FormatDate = (date:string) =>{
   return moment(date).format('DD MMM hh:mm A');
 }
 
+const closeModals = () => {
+  userConfirmationModal.value = false
+}
+
 const sortTask = (tasks)=>{
   const taskOrder = ["PlateWriting", "PlateExposure", "PlateWashing", "PlateDrying", "PlateFinishing"];
   const sortedTasks = [];
@@ -266,7 +274,7 @@ const sortTask = (tasks)=>{
           :bordered="false"
           class="rounded-2xl"
           :body-style="{ padding: '0px' }"
-          :style="{ width: '60%' }"
+          :style="{ width: '80%' }"
       >
         <template #header>
           <div class="flex items-center justify-center w-full gap-2">
@@ -484,8 +492,8 @@ const sortTask = (tasks)=>{
               Close
             </n-button>
             <n-button class="flex items-center px-6 justify-around gap-6 bg-blue-500 text-white rounded-lg p-2 hover:bg-blue-600"
-                    @click="userConfirmationModal = true">
-              Start Job & Plate Writing
+                    @click="openUserConfirmationModal(selectedJob.jobID)">
+              Start {{ getTaskName(getNextTask(useJobStore().getCurrentTask(selectedJob.jobID).taskType))}}
             </n-button>
 
           </div>
@@ -540,7 +548,7 @@ const sortTask = (tasks)=>{
 
         <template #footer>
           <div class="flex items-center justify-center gap-2">
-            <n-button class="flex items-center px-6 justify-around gap-6 bg-red-500 text-white rounded-lg p-2 hover:bg-red-600" @click="userConfirmationModal=false">
+            <n-button class="flex items-center px-6 justify-around gap-6 bg-red-500 text-white rounded-lg p-2 hover:bg-red-600" @click="closeModals()">
               Cancel
             </n-button>
             <n-button class="flex items-center px-6 justify-around gap-6 bg-blue-500 text-white rounded-lg p-2 hover:bg-blue-600"
@@ -579,7 +587,7 @@ const sortTask = (tasks)=>{
                 </n-tag>
                 <div class="text-sm text-gray-500">
                   Started :
-                  {{ formatTime(useJobStore().getCurrentTask(job.jobID).startedTime)}}
+                  {{ formatDateTime(useJobStore().getCurrentTask(job.jobID).startedTime)}}
                 </div>
                 <div class="text-sm gap-2 text-gray-500">
                   Started By :

@@ -62,7 +62,7 @@ interface Task {
     taskType: string;
     startedTime: Date;
     startedBy: string
-    finishedTime: Date;
+    finishedTime: Date | string;
     finishedBy: string;
     remarks: string;
 }

@@ -7,6 +7,7 @@ import router from "../router";
 
 
 const createUser = async (email: string, password: string) => {
+
     return await createUserWithEmailAndPassword(fAuth, email, password)
 }
 

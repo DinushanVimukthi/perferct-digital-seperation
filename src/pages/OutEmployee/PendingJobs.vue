@@ -139,9 +139,10 @@ const StartJob = () => {
     taskID: "Task_" + Math.random().toString(36).substr(2, 9),
     taskType: "PlateWriting",
   }
-  const tasks = jobStore.getTasks(jobID);
-  if (!tasks){
 
+  const tasks = jobStore.getTasks(jobID);
+
+  if (!tasks){
     jobStore.updateJobStatus(jobID,"Processing");
     jobStore.addJobTask(jobID,task);
     userConfirmationModal.value = false;

@@ -61,7 +61,7 @@ const FormatDate = (date:string) =>{
 }
 
 const formatTime = (time:string) => {
-  return moment(time, "HH:mm:ss").format("MMMM Do YYYY, h:mm:ss a")
+  return moment(time, "HH:mm:ss").format("MMM Do YYYY, h:mm a")
 };
 const viewJobModel = ref(false);
 const drawRectaangle = (ctx, x, y, width, height,labelWidth,labelHeight, color,child=false) => {
@@ -205,6 +205,12 @@ const elapsedTime = (startTime:string,endTime:string)=>{
   return moment.utc(moment(endTime,"HH:mm:ss").diff(moment(startTime,"HH:mm:ss"))).format("HH:mm:ss")
 }
 
+const timeDifference = (startTime:string,endTime:string)=>{
+  const endTimes =  new Date(endTime);
+  const startTimes =  new Date(startTime);
+  return moment.utc(moment(endTimes).diff(moment(startTimes))).format("HH:mm:ss")
+}
+
 </script>
 
 <template>
@@ -221,7 +227,7 @@ const elapsedTime = (startTime:string,endTime:string)=>{
           :bordered="false"
           class="rounded-2xl"
           :body-style="{ padding: '0px' }"
-          :style="{ width: '80%' }"
+          :style="{ width: '95%' }"
       >
         <template #header>
           <div class="flex items-center justify-center w-full gap-2">
@@ -384,7 +390,7 @@ const elapsedTime = (startTime:string,endTime:string)=>{
                     <td>{{task.taskType}}</td>
                     <td>
                       <n-tag :type="task.finishedTime.toString().trim()===''? 'info' :'success'">
-                        {{elapsedTime(FormatDate(task.startedTime),FormatDate(task.finishedTime))}}
+                        {{timeDifference(task.startedTime,task.finishedTime)}}
                       </n-tag>
                     </td>
                     <td>{{FormatDate(task.startedTime)}}</td>
@@ -502,7 +508,7 @@ const elapsedTime = (startTime:string,endTime:string)=>{
       <div class="text-center pt-2 pb-8 w-full">
         <span class="text-3xl font-bold">Finished Jobs</span>
       </div>
-      <n-table striped size="small" border="outer" class="w-[80%]">
+      <n-table striped size="small" border="outer" class="w-[90%]">
         <thead>
         <tr class="text-center">
           <th>Job ID</th>
@@ -520,7 +526,7 @@ const elapsedTime = (startTime:string,endTime:string)=>{
           <td>{{formatTime(job.createdTime)}}</td>
           <td>{{formatTime(job.tasks.PlateFinishing.finishedTime)}}</td>
           <td>
-            {{moment.utc(moment(job.tasks.PlateFinishing.finishedTime,"HH:mm:ss").diff(moment(job.createdTime,"HH:mm:ss"))).format("HH:mm:ss")}}
+            {{moment.utc(moment(job.tasks.PlateFinishing.finishedTime,"HH:mm:ss").diff(moment(job.createdTime,"HH:mm:ss"))).format("HH:mm")}}
           </td>
           <td class="flex items-center justify-center gap-2">
             <n-button class="bg-blue-50 hover:bg-blue-500 flex items-center justify-center gap-3 border border-blue-700 font-bold py-2 px-2 rounded-2xl hover:text-white" @click="markAsCollectable(job)">

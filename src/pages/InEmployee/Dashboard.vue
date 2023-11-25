@@ -53,6 +53,10 @@ const notify = (type: NotificationType, title: string, message: string) => {
   })
 }
 
+const dateDisabled= (ts:number)=>{
+  return ts < Date.now()
+}
+
 const priorities = [
   {label: "Urgent", value: "Urgent"},
   {label: "High", value: "High"},
@@ -86,12 +90,12 @@ const thickness = ref(0);
 
 const job = ref<Job>({
   jobID: jobStore.getLastJobID,
-  jobName: "Job First",
+  jobName: "",
   createdTime: "",
   createdBy: userStore.getUser.userID,
   deadLine: null,
-  width: 700,
-  length: 1500,
+  width: 0,
+  length: 0,
   sheetID: "",
   bSheetID: "",
   cutSheetID: "",
@@ -178,20 +182,25 @@ const addJob = () => {
   } else if (job.value.deadLine == null) {
     notify("error", "Error", "Please select a deadline")
     return
-  } else {
+  } else
+  {
+
     job.value.jobID = jobStore.getLastJobID;
     job.value.createdTime = new Date().toLocaleString();
     job.value.currentStatus = "Pending";
     job.value.createdBy = userStore.getUser.userID;
-    jobStore.addJob(job.value);
-    notify("success", "Success", "Job Added Successfully")
-    addJobModel.value = false;
     job.value.createdTime = new Date().toLocaleString();
 
     const balanceSheet = sheetStore.getBalanceSheet;
     let sheet = balanceSheet.find((s) => s.bSheetID === job.value.bSheetID);
     if (!sheet) {
       sheet = sheetStore.getSheet(job.value.sheetID);
+    }
+    console.log(job.value);
+    //check sheet width and length are more or equal to job width and length
+    if (sheet.width < job.value.width || sheet.length < job.value.length) {
+      notify("error", "Error", "Sheet width or length is less than job width or length")
+      return
     }
 
     const bSheets: BalanceSheet[] = [];
@@ -209,11 +218,6 @@ const addJob = () => {
     if (balanceSheetID.value.toString().trim() !== "") {
       preBalanceSheet = preBalanceSheets.find((sheet) => sheet.bSheetID === balanceSheetID.value);
     }
-    // console.log(balanceSheetID)
-    // return;
-    console.log(sheet)
-    console.log(bSheets)
-    console.log(balanceSheetID.value)
     if (bSheets.length > 0) {
       sheetStore.addBalanceSheet(job.value.sheetID, bSheets);
     } else {
@@ -237,10 +241,13 @@ const addJob = () => {
 
     sheetStore.addCutSheet(sheet.sheetID, cutSheet);
     try {
-      jobStore.addJob(job.value);
+      let jobTmp = job.value;
+      console.log(jobTmp);
+      console.log(job.value);
+      jobStore.addJob(jobTmp);
       addJobModel.value = false;
       notify('success', 'Successful!', 'Job Added Successfully');
-      cancelJob();
+      // cancelJob();
     } catch (e: any) {
       notify('error', 'Error!', e.message);
     }
@@ -306,6 +313,7 @@ const sheets = computed(() => {
   //     return true;
   //   }
   // });
+
   SelectedSheets = SelectedSheets.filter((sheet: Sheet) => {
     return sheet.length >= job.value.length && sheet.width >= job.value.width;
   })
@@ -389,6 +397,10 @@ const viewSelectedJob = (job: Job) => {
   viewJobModel.value = true;
 }
 const OpenAddJobModal = () => {
+  job.value.width = 0;
+  job.value.length = 0;
+  thickness.value = 0;
+  balanceSheetID.value = "";
   addJobModel.value = true;
   job.value.jobID = jobStore.getLastJobID;
   availableSheets.value = sheetStore.getBalanceSheet;
@@ -570,6 +582,7 @@ const deleteJob = (job: Job) => {
                         class="mr-8"
                         v-model:formatted-value="job.deadLine"
                         value-format="yyyy-MM-dd HH:mm"
+                        :is-date-disabled="dateDisabled"
                         type="datetime"
                         clearable
                     />
@@ -694,7 +707,6 @@ const deleteJob = (job: Job) => {
         v-model:show="viewJobModel"
         :on-after-enter="()=>{draw(sheetStore.getCutSheet(currentJob.jobID))}"
         title="View Job"
-        :width="1000"
         :mask-closable="false"
         :closable="false"
         :footer="false">
@@ -702,7 +714,7 @@ const deleteJob = (job: Job) => {
           :bordered="false"
           class="rounded-2xl"
           :body-style="{ padding: '0px' }"
-          :style="{ width: '80%' }"
+          :style="{ width: '95%' }"
       >
         <template #header>
           <div class="flex items-center justify-center w-full gap-2">
@@ -883,7 +895,7 @@ const deleteJob = (job: Job) => {
                     <td>{{ task.taskType }}</td>
                     <td>
                       <n-tag :type="task.finishedTime.toString().trim()===''? 'info' :'success'">
-                        {{ task.finishedTime.toString().trim() === "" ? "In Progress" : task.finishedTime.toString() }}
+                        {{ task.finishedTime.toString().trim() === "" ? "In Progress" : "Completed" }}
                       </n-tag>
                     </td>
                     <td>{{ FormatDate(task.startedTime.toString()) }}</td>

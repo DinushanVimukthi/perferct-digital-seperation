@@ -94,7 +94,11 @@ const draw = (cutSheet: CutSheet) => {
 const sheetStore = useSheetStore()
 
 const dialog = useDialog()
-
+const timeDifference = (startTime:string,endTime:string)=>{
+  const endTimes =  new Date(endTime);
+  const startTimes =  new Date(startTime);
+  return moment.utc(moment(endTimes).diff(moment(startTimes))).format("HH:mm:ss")
+}
 const elapsedTime = (startTime: string, endTime: string) => {
   console.log(startTime, endTime)
   if (endTime.toString().trim() === "") {
@@ -144,7 +148,7 @@ const collectJob = (job:any) => {
           :bordered="false"
           class="rounded-2xl"
           :body-style="{ padding: '0px' }"
-          :style="{ width: '80%' }"
+          :style="{ width: '90%' }"
       >
         <template #header>
           <div class="flex items-center  justify-center w-full gap-2">
@@ -353,7 +357,7 @@ const collectJob = (job:any) => {
                     <td>{{ task.taskType }}</td>
                     <td>
                       <n-tag :type="task.finishedTime.toString().trim()===''? 'info' :'success'">
-                        {{ elapsedTime(FormatDate(task.startedTime.toString()), FormatDate(task.finishedTime.toString()))}}
+                        {{ timeDifference(FormatDate(task.startedTime.toString()), FormatDate(task.finishedTime.toString()))}}
                       </n-tag>
                     </td>
                     <td>{{ FormatDate(task.startedTime.toString()) }}</td>
@@ -396,6 +400,7 @@ const collectJob = (job:any) => {
             <th>Sheet Thickness</th>
             <th>Started Time</th>
             <th>Finished Time</th>
+            <th>Status</th>
             <th>Action</th>
           </tr>
           </thead>
@@ -408,7 +413,7 @@ const collectJob = (job:any) => {
             <td>{{FormatDate(job.createdTime)}}</td>
             <td>{{FormatDate(job.tasks.PlateFinishing.finishedTime)}}</td>
             <td>{{job.currentStatus}}</td>
-            <td class="flex gap-2">
+            <td class="flex items-center justify-center gap-2">
               <n-button class="bg-green-50  border border-green-700 px-2 py-1 rounded flex gap-1 items-center justify-center hover:bg-green-700 hover:text-white"
                       @click="collectJob(job)">
                 Collect

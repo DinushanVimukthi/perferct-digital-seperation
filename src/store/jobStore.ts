@@ -64,6 +64,7 @@ export const useJobStore = defineStore('jobStore', {
             const values:Task[] = Object.values(tasks);
             for (let value of values) {
                 if(value.finishedTime===""){
+                    console.log(value)
                     return value;
                 }
             }
@@ -143,11 +144,15 @@ export const useJobStore = defineStore('jobStore', {
         async updateJobStatus(jobID: string, status: string) {
             const job: Job = Object.values(this.jobs).find((job: Job) => job.jobID === jobID);
             job.currentStatus = status;
+            job.jobID = jobID;
             await editJob(job);
         },
         async finishTask(jobID: string, taskName: string,userID:string) {
             const job: Job = Object.values(this.jobs).find((job: Job) => job.jobID === jobID);
             const task: Task = job.tasks[taskName];
+            console.log(task)
+            console.log(job);
+            console.log(jobID)
             task.finishedTime = new Date().toISOString();
             task.finishedBy = userID;
             await updateTask(jobID,taskName,task);

@@ -67,6 +67,14 @@ const fullBalanceSheetCount = (sheets:BalanceSheet[])=>{
                 Balance Sheet : {{item.length - fullBalanceSheetCount(item)}}
               </h2>
           </div>
+
+        </div>
+      </div>
+      <div v-if="balanceSheets.length === 0" class="flex flex-col gap-1 border-2 gao-3">
+        <div class="bg-white text-center px-2 py-2 flex flex-row justify-between items-center">
+          <h1 class="text-2xl w-full font-bold">
+            No Balance Sheet Found
+          </h1>
         </div>
       </div>
     </div>

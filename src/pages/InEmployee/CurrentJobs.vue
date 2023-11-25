@@ -103,7 +103,7 @@ const sortTask = (tasks:Record<string,Task>)=>{
           :bordered="false"
           class="rounded-2xl"
           :body-style="{ padding: '0px' }"
-          :style="{ width: '60%' }"
+          :style="{ width: '90%' }"
       >
         <template #header>
           <div class="flex items-center justify-center w-full gap-2">

@@ -12,7 +12,6 @@ import InSetting from "@pages/InEmployee/Setting.vue";
 import CollectableJobs from "@pages/InEmployee/CollectableJobs.vue";
 
 
-import SMDashboard from "@pages/StockManager/Dashboard.vue";
 import SMStock from "@pages/StockManager/Stock.vue";
 
 import ADashboard from "@pages/Owner/Dashboard.vue";
@@ -23,12 +22,11 @@ import OCollectable from "@/pages/Owner/FinishedJobs.vue";
 import OReport from "@/pages/Owner/Report.vue";
 
 
-
-import {useUserStore} from "@store/UserStore.ts";
-import {fAuth} from "@/services/firebase.ts";
-import {getCurrentUser, getUserFromDB, IsUserLoggedIn} from "@/services/userService.ts";
-
 // @ts-ignore
+import {useUserStore} from '/src/store/UserStore.ts';
+import {fAuth} from "/src/services/firebase.ts";
+import {getUserFromDB, IsUserLoggedIn} from '/src/services/userService.ts';
+
 const routes = [
     {
         path: '/',
@@ -37,7 +35,7 @@ const routes = [
             {
                 path: '',
                 name: 'Login',
-                component: () => LoginPage
+                component: LoginPage
             }
             ],
         meta : {
@@ -77,32 +75,32 @@ const routes = [
             {
                 path: 'dashboard',
                 name: 'OutDashboard',
-                component: () => OngoingJobs
+                component: OngoingJobs
             },
             {
                 path: 'ongoing',
                 name: 'OutOngoing',
-                component: () => OngoingJobs
+                component: OngoingJobs
             },
             {
                 path: 'pending',
                 name: 'OutPending',
-                component: () => PendingJobs
+                component: PendingJobs
             },
             {
                 path: 'finished',
                 name: 'OutFinished',
-                component: () => FinishedJobs
+                component: FinishedJobs
             },
             {
                 path: 'reportIssue',
                 name: 'OutReport',
-                component: () => ReportIssue
+                component: ReportIssue
             },
             {
                 path: 'settings',
                 name: 'OutProfile',
-                component: () => Setting
+                component: Setting
             }
             ],
         beforeEnter: async () => {
@@ -126,22 +124,22 @@ const routes = [
             {
                 path: 'dashboard',
                 name: 'InDashboard',
-                component: () => InDashboard
+                component: InDashboard
             },
             {
                 path: 'current',
                 name: 'InCurrent',
-                component: () => InCurrentJobs
+                component: InCurrentJobs
             },
             {
                 path: 'collectable',
                 name: 'InCollectable',
-                component: () => CollectableJobs
+                component: CollectableJobs
             },
             {
                 path: 'settings',
                 name: 'InProfile',
-                component: () => InSetting
+                component: InSetting
             }
             ],
         beforeEnter: () => {
@@ -195,11 +193,11 @@ const routes = [
             {
                 path: 'dashboard',
                 name: 'SMDashboard',
-                component: () => SMStock
+                component: SMStock
             },{
                 path: 'stock',
                 name: 'SMStock',
-                component: () => SMStock
+                component: SMStock
             }
         ]
     }

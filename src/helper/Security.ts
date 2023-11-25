@@ -12,7 +12,6 @@ const decryptText = (text: string) => {
 }
 
 const compareText = (text: string, encryptedText: string) => {
-    console.log(decryptText(encryptedText))
     return text === decryptText(encryptedText);
 }
 

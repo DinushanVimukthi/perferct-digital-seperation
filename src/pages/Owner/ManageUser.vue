@@ -60,13 +60,13 @@ const deactivateUserModal = ref(false);
 // })
 const userForm = ref({
   userID: "user_01",
-  userEmail:"stdinushan@gmail.com",
-  userName:"User01",
-  firstName : "User 01 First",
-  lastName:"User 01 Last",
+  userEmail:"",
+  userName:"",
+  firstName : "",
+  lastName:"",
   userRole:"InEmployee",
-  userPassword:"1234567890",
-  userPIN : "1234"
+  userPassword:"",
+  userPIN : ""
 })
 
 //User Type Objects

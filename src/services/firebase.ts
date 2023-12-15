@@ -8,28 +8,17 @@ import { getStorage } from "firebase/storage";
 
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-/*
-const firebaseConfig = {
-    apiKey: "AIzaSyBZcoJBfB5qmB0jPMNzdCxbuyDJLt3ty0o",
-    authDomain: "perfectds-a3d3f.firebaseapp.com",
-    databaseURL: "https://perfectds-a3d3f-default-rtdb.firebaseio.com",
-    projectId: "perfectds-a3d3f",
-    storageBucket: "perfectds-a3d3f.appspot.com",
-    messagingSenderId: "1089347137100",
-    appId: "1:1089347137100:web:18babf8ea349fbd82dcee9",
-    measurementId: "G-JECX085JJZ"
-};
-*/
+
 
 const firebaseConfig = {
-    apiKey: "AIzaSyCNwbb2zrfVwHCu4iB4K2CKYg-peEkSpn4",
-    authDomain: "perfect-digital-2278a.firebaseapp.com",
-    databaseURL: "https://perfect-digital-2278a-default-rtdb.firebaseio.com",
-    projectId: "perfect-digital-2278a",
-    storageBucket: "perfect-digital-2278a.appspot.com",
-    messagingSenderId: "252182299616",
-    appId: "1:252182299616:web:8be6e493026872268c6185",
-    measurementId: "G-1R8QS40YCB"
+    apiKey: "AIzaSyBpvzRpap-X4qyoBJ3mRSab08c_1sBQa6s",
+    authDomain: "perfect-digital-e2fb2.firebaseapp.com",
+    databaseURL: "https://perfect-digital-e2fb2-default-rtdb.firebaseio.com",
+    projectId: "perfect-digital-e2fb2",
+    storageBucket: "perfect-digital-e2fb2.appspot.com",
+    messagingSenderId: "896716918465",
+    appId: "1:896716918465:web:1f918758624d8028b18e40",
+    measurementId: "G-BK2Z6X7LCP"
 };
 
 // Initialize Firebase

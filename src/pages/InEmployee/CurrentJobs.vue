@@ -17,7 +17,7 @@ const FormatDate = (date:string) =>{
 
 const viewJobModel = ref(false);
 
-const drawRectaangle = (ctx, x, y, width, height,labelWidth,labelHeight, color,child=false) => {
+const drawRectangle = (ctx, x, y, width, height, labelWidth, labelHeight, color, child=false) => {
   ctx.strokeStyle = color;
   ctx.lineWidth = 2;
 
@@ -58,8 +58,8 @@ const draw = (cutSheet:CutSheet) =>{
     width: cutSheet.width,
     height: cutSheet.length,
   }
-  drawRectaangle(ctx, 20, 15, (parent.width-50) * widthRatio, (parent.height-50) * heightRatio,parent.width,parent.height, 'black');
-  drawRectaangle(ctx, 20, 15, (child.width-50) * widthRatio, (child.height-50)  * heightRatio,child.width,child.height, 'red',true);
+  drawRectangle(ctx, 20, 15, (parent.width-50) * widthRatio, (parent.height-50) * heightRatio,parent.width,parent.height, 'black');
+  drawRectangle(ctx, 20, 15, (child.width-50) * widthRatio, (child.height-50)  * heightRatio,child.width,child.height, 'red',true);
 }
 const selectedJob =ref<Job>(null);
 const clearSelectedJob = () => {

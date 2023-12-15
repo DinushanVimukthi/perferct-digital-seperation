@@ -3,8 +3,18 @@
 import OwnerLayout from "@/Layout/OwnerLayout.vue";
 import {useSheetStore} from "../../store/sheetStore.ts";
 import {BalanceSheet} from "../../types/Types.ts";
+import {ref} from "vue";
+import {NCard, NModal} from "naive-ui";
+import {DocumentTextOutline} from "@vicons/ionicons5";
 
 const sheetStore = useSheetStore();
+const selectedSheetsInCategory = ref<any>(null);
+const modalActive = ref(false);
+
+const openModal = (sheets)=>{
+  selectedSheetsInCategory.value = sheets;
+  modalActive.value = true;
+}
 
 const balanceSheets = sheetStore.getBalanceSheet;
 
@@ -41,14 +51,41 @@ const groupSheetWithSameHeightAndLength = (sheets:BalanceSheet[])=>{
 const fullBalanceSheetCount = (sheets:BalanceSheet[])=>{
   return sheets.filter((sheet)=>sheet.bSheetID === "").length;
 }
-
-
-
-
 </script>
 
 <template>
+  <n-modal
+      v-model:show="modalActive"
+      title="Sheet ID"
+      :mask-closable="true"
+      :closable="true"
+      :footer="false">
+    <n-card
+        :bordered="false"
+        class="rounded-2xl"
+        :body-style="{ padding: '0px' }"
+        :style="{ width: '50%' }"
+    >
+      <template #header>
+        <div class="flex items-center text-black  justify-center w-full gap-2">
+          <div class="flex items-center justify-center gap-2">
+            <n-icon :component="DocumentTextOutline" size="large"/>
+            <n-text class="text-2xl font-bold">Sheet Ids</n-text>
+          </div>
+        </div>
+      </template>
+      <div class="flex flex-col flex-wrap items-center justify-center gap-2 p-2">
+        <div class="" v-for="sheet in selectedSheetsInCategory">
+          <n-text class="text-2xl font-bold">
+            {{sheet.bSheetID === "" ? sheet.sheetID : sheet.bSheetID}}
+          </n-text>
+        </div>
+
+      </div>
+    </n-card>
+  </n-modal>
   <OwnerLayout>
+
     <div class="overflow-y-scroll flex flex-col gap-4 max-h-[90vh]">
       <div v-for="sheet in thickness" class="flex flex-col gap-1 border-2 gao-3">
         <div class="bg-white text-center px-2 py-2 flex flex-row justify-between items-center">
@@ -56,7 +93,10 @@ const fullBalanceSheetCount = (sheets:BalanceSheet[])=>{
             Thickness : {{sheet[0].thickness}}mm</h1>
         </div>
         <div class="flex gap-0.5 bg-white flex-row flex-wrap">
-          <div v-for="item in groupSheetWithSameHeightAndLength(sheet)" class="flex flex-col w-1/4 m-2 p-5 border border-solid border-black">
+          <div v-for="item in groupSheetWithSameHeightAndLength(sheet)"
+               class="flex flex-col w-1/4 m-2 p-5 border cursor-pointer border-solid border-black hover:bg-gray-200"
+                @click="openModal(item)"
+          >
             <h3>
               {{item[0].length}}mm x {{item[0].width}}mm
             </h3>
@@ -78,10 +118,7 @@ const fullBalanceSheetCount = (sheets:BalanceSheet[])=>{
         </div>
       </div>
     </div>
-
-
   </OwnerLayout>
-
 </template>
 
 <style scoped>

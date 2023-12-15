@@ -306,7 +306,8 @@ const Jobs = computed(()=>{
                   </div>
                   <div class="flex w-3/4 items-center justify-start px-2">
                     <n-tag round :bordered="false" :type="sheetStore.getSheet(selectedJob.sheetID).balanceSheets ? 'info' : 'success'">
-                      {{sheetStore.getSheet(selectedJob.sheetID).balanceSheets ? "Balance Sheet" : "Normal Sheet"}}
+<!--                      {{sheetStore.getSheet(selectedJob.sheetID).balanceSheets ? "Balance Sheet" : "Normal Sheet"}}-->
+                      {{selectedJob.sheetID}}
                       <template #icon>
                         <n-icon :component="CheckmarkCircle" />
                       </template>
@@ -383,8 +384,7 @@ const Jobs = computed(()=>{
                     <n-icon size="large" :component="Calendar" />
                     <div class="flex flex-col gap-1">
                       <div class="text-xs">
-                        {{selectedJob.deadline}}
-                        {{selectedJob.createdTime}}
+                        {{selectedJob.deadLine}}
                       </div>
                     </div>
                   </div>

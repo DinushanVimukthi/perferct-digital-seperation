@@ -8,10 +8,12 @@ const encryptText = (text: string) => {
 }
 
 const decryptText = (text: string) => {
+
     return CryptoJS.AES.decrypt(text, APP_SECRET_KEY as string).toString(CryptoJS.enc.Utf8);
 }
 
 const compareText = (text: string, encryptedText: string) => {
+    console.log(decryptText(encryptedText));
     return text === decryptText(encryptedText);
 }
 

@@ -153,18 +153,46 @@ const balanceSheets = (sheet: Sheet) => {
 
     }
   } else {
-    remainingSheets.push({
-      sheetID: sheet.sheetID,
-      width: job.value.width,
-      length: remainingLength,
-      selected: false
-    })
-    remainingSheets.push({
-      sheetID: sheet.sheetID,
-      width: remainingWidth,
-      length: sheet.length,
-      selected: false
-    })
+    // if()
+    const A1 = job.value.width * remainingLength;
+    const A2 = sheet.length * remainingWidth;
+    let minA = A1 < A2 ? A1 : A2;
+    let maxA = A1 > A2 ? A1 : A2;
+    let A = minA / maxA;
+
+    const B1 = job.value.length * remainingWidth;
+    const B2 = sheet.width * remainingLength;
+    let minB = B1 < B2 ? B1 : B2;
+    let maxB = B1 > B2 ? B1 : B2;
+    let B = minB / maxB;
+    console.log(A,B);
+    if(A>B){
+      remainingSheets.push({
+        sheetID: sheet.sheetID,
+        width: remainingWidth,
+        length: job.value.length,
+        selected: false
+      })
+      remainingSheets.push({
+        sheetID: sheet.sheetID,
+        width: sheet.width,
+        length: remainingLength,
+        selected: false
+      })
+    }else{
+      remainingSheets.push({
+        sheetID: sheet.sheetID,
+        width: job.value.width,
+        length: remainingLength,
+        selected: false
+      })
+      remainingSheets.push({
+        sheetID: sheet.sheetID,
+        width: remainingWidth,
+        length: sheet.length,
+        selected: false
+      })
+    }
   }
   return remainingSheets;
 }
@@ -461,6 +489,7 @@ const draw = (cutSheet: CutSheet) => {
   }
   drawRectangle(ctx, 20, 10, (parent.width - 50) * widthRatio, (parent.height - 50) * heightRatio, parent.width, parent.height, 'black');
   drawRectangle(ctx, 20, 10, (child.width - 50) * widthRatio, (child.height - 50) * heightRatio, child.width, child.height, 'red', true);
+
 }
 
 const viewSheet = (selectedSheet: Sheet) => {

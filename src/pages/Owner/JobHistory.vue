@@ -131,7 +131,7 @@ const pastJob = computed(() => {
     }
     return filteredJobs;
   }
-  return jobs;
+  return [];
 })
 
 const markAsCollectable = (job: Job) => {
@@ -145,9 +145,9 @@ const confirmation = ref({
   currentTask: {} as Task
 })
 
-const timeDifference = (startTime:string,endTime:string)=>{
-  const endTimes =  new Date(endTime);
-  const startTimes =  new Date(startTime);
+const timeDifference = (startTime: string, endTime: string) => {
+  const endTimes = new Date(endTime);
+  const startTimes = new Date(startTime);
   return moment.utc(moment(endTimes).diff(moment(startTimes))).format("HH:mm:ss")
 }
 
@@ -212,7 +212,7 @@ const MarkAsDeliverable = () => {
 
 }
 
-const filterJob = ()=>{
+const filterJob = () => {
 
 }
 
@@ -383,6 +383,46 @@ const monthToSort = ref(Date.now());
 
                 </div>
               </div>
+              <!-- Floor Values -->
+              <div class="flex w-1/2 flex-col gap-2 p-2">
+                <div class="text-xl font-bold text-center mb-3">
+                  Floor Details
+                </div>
+                <div class="flex w-full gap-2 flex-col">
+                  <div class="flex">
+                    <div class="flex font-bold w-2/3 items-center justify-center px-3">
+                      Floor X1 :
+                    </div>
+                    <div class="flex w-3/4 items-center justify-start px-2">
+                      {{ currentJob.floorValues.floorX1 }}mm
+                    </div>
+                  </div>
+                  <div class="flex">
+                    <div class="flex font-bold w-2/3 items-center justify-center px-3">
+                      Floor Y1 :
+                    </div>
+                    <div class="flex w-3/4 items-center justify-start px-2">
+                      {{ currentJob.floorValues.floorY1 }}mm
+                    </div>
+                  </div>
+                  <div class="flex">
+                    <div class="flex font-bold w-2/3 items-center justify-center px-3">
+                      Floor X2 :
+                    </div>
+                    <div class="flex w-3/4 items-center justify-start px-2">
+                      {{ currentJob.floorValues.floorX2 }}mm
+                    </div>
+                  </div>
+                  <div class="flex">
+                    <div class="flex font-bold w-2/3 items-center justify-center px-3">
+                      Floor Y2 :
+                    </div>
+                    <div class="flex w-3/4 items-center justify-start px-2">
+                      {{ currentJob.floorValues.floorY2 }}mm
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
             <div class="flex flex-col gap-2 border-2 rounded-2xl p-4">
               <div class="text-xl font-bold text-center mb-3">
@@ -535,9 +575,9 @@ const monthToSort = ref(Date.now());
       <div class="flex items-center justify-center my-6">
         <div class="flex w-full items-center justify-center gap-4">
           <div class="flex items-center justify-center gap-2">
-            <n-text class="text-xl font-bold">Filter By </n-text>
+            <n-text class="text-xl font-bold">Filter By</n-text>
           </div>
-          <n-date-picker v-model:value="monthToSort" type="month" clearable />
+          <n-date-picker v-model:value="monthToSort" type="month" clearable/>
           <n-button
               class="flex items-center px-6 justify-around gap-6 bg-blue-500 text-white rounded-lg p-2 hover:bg-blue-600"
               @click="filterJob">
@@ -554,6 +594,13 @@ const monthToSort = ref(Date.now());
             <th>Started Time</th>
             <th>FinishedTime</th>
             <th>Time Elapsed</th>
+            <th> Sheet ID</th>
+            <th> Sheet Thickness</th>
+            <th> Sheet Width</th>
+            <th> Sheet Length</th>
+            <th> Cut Width</th>
+            <th> Cut Length</th>
+            <th> Balanced Sheets</th>
             <th>Action</th>
           </tr>
           </thead>
@@ -566,9 +613,21 @@ const monthToSort = ref(Date.now());
             <td>{{ FormatDate(job.tasks.PlateFinishing.finishedTime) }}</td>
             <td>
               {{
-                elapsedTime(FormatDate(job.createdTime), FormatDate(job.tasks.PlateFinishing.finishedTime))
+                timeDifference(job.createdTime, job.tasks.PlateFinishing.finishedTime)
               }}
             </td>
+            <td>{{ sheetStore.getSheet(job.sheetID).sheetID }}</td>
+            <td>{{ sheetStore.getSheet(job.sheetID).thickness }}mm</td>
+            <td>{{ sheetStore.getSheet(job.sheetID).width }}mm</td>
+            <td>{{ sheetStore.getSheet(job.sheetID).length }}mm</td>
+            <td>{{ job.width }}mm</td>
+            <td>{{ job.length }}mm</td>
+            <td>
+              <span v-for="bsheet in sheetStore.getSheet(job.sheetID).balanceSheets" :key="bsheet.sheetID">
+                {{ bsheet.width }}mm x {{ bsheet.length }}mm <br>
+              </span>
+            </td>
+
             <td class="flex gap-2 items-center justify-center">
               <n-button
                   @click="viewSelectedJob(job)"

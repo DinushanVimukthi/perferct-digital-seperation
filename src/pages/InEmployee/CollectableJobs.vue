@@ -18,7 +18,7 @@ import {useJobStore} from "/src/store/jobStore.ts";
 import {useSheetStore} from "/src/store/sheetStore.ts";
 import moment from "moment/moment";
 import {useUserStore} from "/src/store/UserStore.ts";
-import {CutSheet, Job, Task} from "/src/types/Types.ts";
+import {CutSheet, Job, Sheet, Task} from "/src/types/Types.ts";
 
 const jobStore = useJobStore()
 const search = ref()
@@ -44,11 +44,15 @@ const viewJob = (job:any) => {
   currentJob.value = job
   viewJobModel.value = true
 }
-const drawRectangle = (ctx: CanvasRenderingContext2D, x: number, y: number, width: number, height: number, labelWidth: number, labelHeight: number, color: string, child = false) => {
+const canvasRef = ref<HTMLCanvasElement>();
+const drawRectangle = (ctx: CanvasRenderingContext2D, x: number, y: number, width: number, height: number, labelWidth: number, labelHeight: number, color: string,fillColor="white",name="", child = false) => {
   ctx.strokeStyle = color;
   ctx.lineWidth = 2;
-
-  // Draw the rectangle
+  // Draw the rectangle and fill it with the fill color
+  ctx.fillStyle = fillColor;
+  // ctx.strokeRect(x, y, width, height);
+  ctx.fillRect(x, y, width, height)
+  // add border
   ctx.strokeRect(x, y, width, height);
 
   // Calculate the position for the width and height labels
@@ -62,14 +66,22 @@ const drawRectangle = (ctx: CanvasRenderingContext2D, x: number, y: number, widt
 
   // Draw labels for width and height
   ctx.fillStyle = color;
+
+
+
   ctx.font = 'bold 10px Arial';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   ctx.fillText(`${parseFloat(labelWidth.toString()).toFixed(0)} mm`, widthLabelX, widthLabelY);
   ctx.fillText(`${parseFloat(labelHeight.toString()).toFixed(0)} mm`, heightLabelX, heightLabelY);
+  // add name to center
+  if(name!=""){
+    ctx.fillText(`${name}`, widthLabelX, heightLabelY + 50);
+  }
+  // fill color
 };
-const canvasRef = ref<HTMLCanvasElement>();
-const draw = (cutSheet: CutSheet) => {
+
+const draw = (cutSheet: CutSheet,sheet:Sheet) => {
   const canvas: HTMLCanvasElement = canvasRef.value as HTMLCanvasElement;
   const ctx = canvas.getContext('2d');
   if (!ctx) {
@@ -88,8 +100,29 @@ const draw = (cutSheet: CutSheet) => {
     width: cutSheet.width,
     height: cutSheet.length,
   }
+  // get balance sheets
+  const label = "(" + child.height + " x " + child.width + ")";
   drawRectangle(ctx, 20, 10, (parent.width - 50) * widthRatio, (parent.height - 50) * heightRatio, parent.width, parent.height, 'black');
-  drawRectangle(ctx, 20, 10, (child.width - 50) * widthRatio, (child.height - 50) * heightRatio, child.width, child.height, 'red', true);
+  drawRectangle(ctx, 20, 10, (child.width - 50) * widthRatio, (child.height - 50) * heightRatio, child.width, child.height, 'red','yellow',label, true);
+  const s = sheet.balanceSheets;
+  for (let i = 0; i < s.length; i++) {
+    const balanceSheet = s[i];
+    const child = {
+      width: balanceSheet.width,
+      height: balanceSheet.length,
+    }
+    if(child.width == parent.width-cutSheet.width){
+      // draw in top right corner
+      const label = "(" + child.height + " x " + child.width + ")";
+      drawRectangle(ctx, 20 + (cutSheet.width - 50) * widthRatio, 10, (child.width) * widthRatio, (child.height - 50) * heightRatio, child.width, child.height, 'blue', "#E8E8E8",label,true);
+    }else {
+      // draw in bottom left corner
+      const label = "(" + child.height + " x " + child.width + ")";
+      drawRectangle(ctx, 20, 10 + (cutSheet.length - 50) * heightRatio, (child.width - 50) * widthRatio, (child.height) * heightRatio, child.width, child.height, 'blue', "#E8E8E8",label,true);
+    }
+  }
+
+
 }
 const sheetStore = useSheetStore()
 

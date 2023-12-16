@@ -94,13 +94,14 @@ const job = ref<Job>({
   createdTime: "",
   createdBy: userStore.getUser.userID,
   deadLine: null,
-  width: 0,
-  length: 0,
+  width: 600,
+  length: 800,
   sheetID: "",
   bSheetID: "",
   cutSheetID: "",
   design: null,
   currentStatus: "Pending",
+  balanceSheets: [],
   approvedBy: null,
   approvedTime: null,
   priority: "Normal",
@@ -224,7 +225,6 @@ const addJob = () => {
     if (!sheet) {
       sheet = sheetStore.getSheet(job.value.sheetID);
     }
-    console.log(job.value);
     //check sheet width and length are more or equal to job width and length
     if (sheet.width < job.value.width || sheet.length < job.value.length) {
       notify("error", "Error", "Sheet width or length is less than job width or length")
@@ -232,7 +232,6 @@ const addJob = () => {
     }
 
     const bSheets: BalanceSheet[] = [];
-    console.log(balanceSheets(sheet))
     for (let i = 0; i < balanceSheets(sheet).length; i++) {
       const balanceSheet = balanceSheets(sheet)[i];
       bSheets.push({
@@ -241,6 +240,7 @@ const addJob = () => {
         length: balanceSheet.length >= balanceSheet.width ? balanceSheet.length : balanceSheet.width,
       })
     }
+    job.value.balanceSheets = bSheets;
     let preBalanceSheets: Sheet[] = sheetStore.getBalanceSheet
     let preBalanceSheet = null;
     if (balanceSheetID.value.toString().trim() !== "") {
@@ -270,8 +270,6 @@ const addJob = () => {
     sheetStore.addCutSheet(sheet.sheetID, cutSheet);
     try {
       let jobTmp = job.value;
-      console.log(jobTmp);
-      console.log(job.value);
       jobStore.addJob(jobTmp);
       addJobModel.value = false;
       notify('success', 'Successful!', 'Job Added Successfully');
@@ -331,16 +329,6 @@ const sheets = computed(() => {
   let SelectedSheets = availableSheets.value.filter((sheet: Sheet) => {
     return sheet.thickness == Number(thickness.value);
   });
-  // Remove If Sheets has Same sheetID
-  // const sheetIDs: string[] = [];
-  // SelectedSheets = SelectedSheets.filter((sheet: Sheet) => {
-  //   if (sheetIDs.includes(sheet.sheetID)) {
-  //     return false;
-  //   } else {
-  //     sheetIDs.push(sheet.sheetID);
-  //     return true;
-  //   }
-  // });
 
   SelectedSheets = SelectedSheets.filter((sheet: Sheet) => {
     return sheet.length >= job.value.length && sheet.width >= job.value.width;
@@ -414,7 +402,6 @@ const thicknessOfSheets = ref([])
 
 const viewSelectedJob = (job: Job) => {
   const taskOrder = ["PlateWriting", "PlateExposure", "PlateWashing", "PlateDrying", "PlateFinishing"];
-  console.log(job)
 
   currentJob.value = job;
   currentJob.value.tasks = Object.fromEntries(
@@ -442,12 +429,15 @@ const currentJob = ref<Job>({});
 const FormatDate = (date: string) => {
   return moment(date).utc(true).format('DD MMM YYYY hh:mm A');
 }
-
-const drawRectangle = (ctx: CanvasRenderingContext2D, x: number, y: number, width: number, height: number, labelWidth: number, labelHeight: number, color: string, child = false) => {
+const canvasRef = ref<HTMLCanvasElement>();
+const drawRectangle = (ctx: CanvasRenderingContext2D, x: number, y: number, width: number, height: number, labelWidth: number, labelHeight: number, color: string,fillColor="white",name="", child = false) => {
   ctx.strokeStyle = color;
   ctx.lineWidth = 2;
-
-  // Draw the rectangle
+  // Draw the rectangle and fill it with the fill color
+  ctx.fillStyle = fillColor;
+  // ctx.strokeRect(x, y, width, height);
+  ctx.fillRect(x, y, width, height)
+  // add border
   ctx.strokeRect(x, y, width, height);
 
   // Calculate the position for the width and height labels
@@ -461,14 +451,22 @@ const drawRectangle = (ctx: CanvasRenderingContext2D, x: number, y: number, widt
 
   // Draw labels for width and height
   ctx.fillStyle = color;
+
+
+
   ctx.font = 'bold 10px Arial';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   ctx.fillText(`${parseFloat(labelWidth.toString()).toFixed(0)} mm`, widthLabelX, widthLabelY);
   ctx.fillText(`${parseFloat(labelHeight.toString()).toFixed(0)} mm`, heightLabelX, heightLabelY);
+  // add name to center
+  if(name!=""){
+    ctx.fillText(`${name}`, widthLabelX, heightLabelY + 50);
+  }
+  // fill color
 };
-const canvasRef = ref<HTMLCanvasElement>();
-const draw = (cutSheet: CutSheet) => {
+
+const draw = (cutSheet: CutSheet,sheet:BalanceSheet[]) => {
   const canvas: HTMLCanvasElement = canvasRef.value as HTMLCanvasElement;
   const ctx = canvas.getContext('2d');
   if (!ctx) {
@@ -487,8 +485,89 @@ const draw = (cutSheet: CutSheet) => {
     width: cutSheet.width,
     height: cutSheet.length,
   }
+  // get balance sheets
+  const label = "(" + child.height + " x " + child.width + ")";
   drawRectangle(ctx, 20, 10, (parent.width - 50) * widthRatio, (parent.height - 50) * heightRatio, parent.width, parent.height, 'black');
-  drawRectangle(ctx, 20, 10, (child.width - 50) * widthRatio, (child.height - 50) * heightRatio, child.width, child.height, 'red', true);
+  drawRectangle(ctx, 20, 10, (child.width - 50) * widthRatio, (child.height - 50) * heightRatio, child.width, child.height, 'red','yellow',label, true);
+  const s = sheet;
+
+  for (let i = 0; i < s.length; i++) {
+    const balanceSheet = s[i];
+    let child = {
+      width: balanceSheet.width,
+      height: balanceSheet.length,
+    }
+    if(child.width == parent.width-cutSheet.width){
+      // draw in top right corner
+      const label = "(" + child.height + " x " + child.width + ")";
+      drawRectangle(ctx, 20 + (cutSheet.width - 50) * widthRatio, 10, (child.width) * widthRatio, (child.height - 50) * heightRatio, child.width, child.height, 'blue', "#E8E8E8",label,true);
+    }else {
+      // draw in bottom left corner
+      const label = "(" + child.height + " x " + child.width + ")";
+      drawRectangle(ctx, 20, 10 + (cutSheet.length - 50) * heightRatio, (child.width - 50) * widthRatio, (child.height) * heightRatio, child.width, child.height, 'blue', "#E8E8E8",label,true);
+    }
+  }
+
+
+}
+
+const draw_view = (cutSheet: CutSheet,sheet:BalanceSheet[]) => {
+  console.log(sheet);
+  const canvas: HTMLCanvasElement = canvasRef.value as HTMLCanvasElement;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) {
+    return;
+  }
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  const canvasWidth = canvas.width - 20;
+  const canvasHeight = canvas.height - 20;
+  const parent = {
+    width: cutSheet.parentWidth,
+    height: cutSheet.parentLength,
+  }
+  const heightRatio = canvasHeight / parent.height;
+  const widthRatio = canvasWidth / parent.width;
+  const child = {
+    width: cutSheet.width,
+    height: cutSheet.length,
+  }
+  // get balance sheets
+  const label = "(" + child.height + " x " + child.width + ")";
+  drawRectangle(ctx, 20, 10, (parent.width - 50) * widthRatio, (parent.height - 50) * heightRatio, parent.width, parent.height, 'black');
+  drawRectangle(ctx, 20, 10, (child.width - 50) * widthRatio, (child.height - 50) * heightRatio, child.width, child.height, 'red','yellow',label, true);
+  const s = sheet;
+
+  for (let i = 0; i < s.length; i++) {
+    const balanceSheet = s[i];
+    let child = {
+      width: balanceSheet.width,
+      height: balanceSheet.length,
+    }
+    if (child.width + cutSheet.width > parent.width){
+      if(child.width == cutSheet.width && child.width == parent.width){
+
+      }else{
+        let tmp = child.width;
+        child.width = child.height;
+        child.height = tmp;
+      }
+    }
+    else if(child.height + cutSheet.length > parent.height){
+      let tmp = child.width;
+      child.width = child.height;
+      child.height = tmp;
+    }
+    if(child.width == parent.width-cutSheet.width){
+      // draw in top right corner
+      const label = "(" + child.height + " x " + child.width + ")";
+      drawRectangle(ctx, 20 + (cutSheet.width - 50) * widthRatio, 10, (child.width) * widthRatio, (child.height - 50) * heightRatio, child.width, child.height, 'blue', "#E8E8E8",label,true);
+    }else {
+      // draw in bottom left corner
+      const label = "(" + child.height + " x " + child.width + ")";
+      drawRectangle(ctx, 20, 10 + (cutSheet.length - 50) * heightRatio, (child.width - 50) * widthRatio, (child.height) * heightRatio, child.width, child.height, 'blue', "#E8E8E8",label,true);
+    }
+  }
+
 
 }
 
@@ -503,7 +582,7 @@ const viewSheet = (selectedSheet: Sheet) => {
     width: job.value.width,
   }
 
-  draw(cutsheet);
+  draw(cutsheet,balanceSheets(selectedSheet));
 
 }
 
@@ -734,7 +813,7 @@ const deleteJob = (job: Job) => {
     </n-modal>
     <n-modal
         v-model:show="viewJobModel"
-        :on-after-enter="()=>{draw(sheetStore.getCutSheet(currentJob.jobID))}"
+        :on-after-enter="()=>{draw_view(sheetStore.getCutSheet(currentJob.jobID),currentJob.balanceSheets)}"
         title="View Job"
         :mask-closable="false"
         :closable="false"

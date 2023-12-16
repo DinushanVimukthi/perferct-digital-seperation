@@ -15,6 +15,7 @@ interface Job {
     approvedBy: string;
     approvedTime: Date;
     startedTime: Date;
+    balanceSheets: BalanceSheet[] | null;
     collectedDate: Date | null;
     collectedBy: string | null;
     tasks: Task[]; // Writing , Exposing , Washing , Drying , Finishing

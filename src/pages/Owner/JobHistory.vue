@@ -21,7 +21,7 @@ import {Collections20Regular} from "@vicons/fluent";
 import {useJobStore} from "@store/jobStore.ts";
 import moment from "moment";
 import {ref, computed} from "vue";
-import {CutSheet, Job, Task} from "@/types/Types.ts";
+import {BalanceSheet, CutSheet, Job, Task} from "@/types/Types.ts";
 import {useSheetStore} from "@store/sheetStore.ts";
 import {JobType} from "@/types/JobType.ts";
 import {useAdminStore} from "@store/adminStore.ts";
@@ -66,11 +66,15 @@ const formatTime = (time: string) => {
   return moment(time, "HH:mm:ss").format("MMMM Do YYYY, h:mm:ss a")
 };
 const viewJobModel = ref(false);
-const drawRectaangle = (ctx, x, y, width, height, labelWidth, labelHeight, color, child = false) => {
+const canvasRef = ref<HTMLCanvasElement>();
+const drawRectangle = (ctx: CanvasRenderingContext2D, x: number, y: number, width: number, height: number, labelWidth: number, labelHeight: number, color: string,fillColor="white",name="", child = false) => {
   ctx.strokeStyle = color;
   ctx.lineWidth = 2;
-
-  // Draw the rectangle
+  // Draw the rectangle and fill it with the fill color
+  ctx.fillStyle = fillColor;
+  // ctx.strokeRect(x, y, width, height);
+  ctx.fillRect(x, y, width, height)
+  // add border
   ctx.strokeRect(x, y, width, height);
 
   // Calculate the position for the width and height labels
@@ -84,17 +88,29 @@ const drawRectaangle = (ctx, x, y, width, height, labelWidth, labelHeight, color
 
   // Draw labels for width and height
   ctx.fillStyle = color;
+
+
+
   ctx.font = 'bold 10px Arial';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  ctx.fillText(`${parseFloat(labelWidth).toFixed(0)} mm`, widthLabelX, widthLabelY);
-  ctx.fillText(`${parseFloat(labelHeight).toFixed(0)} mm`, heightLabelX, heightLabelY);
+  ctx.fillText(`${parseFloat(labelWidth.toString()).toFixed(0)} mm`, widthLabelX, widthLabelY);
+  ctx.fillText(`${parseFloat(labelHeight.toString()).toFixed(0)} mm`, heightLabelX, heightLabelY);
+  // add name to center
+  if(name!=""){
+    ctx.fillText(`${name}`, widthLabelX, heightLabelY + 50);
+  }
+  // fill color
 };
 
-const canvasRef = ref<HTMLCanvasElement>();
-const draw = (cutSheet: CutSheet) => {
+const draw = (cutSheet: CutSheet,sheet:BalanceSheet[]) => {
+  console.log(sheet);
   const canvas: HTMLCanvasElement = canvasRef.value as HTMLCanvasElement;
   const ctx = canvas.getContext('2d');
+  if (!ctx) {
+    return;
+  }
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
   const canvasWidth = canvas.width - 20;
   const canvasHeight = canvas.height - 20;
   const parent = {
@@ -107,8 +123,44 @@ const draw = (cutSheet: CutSheet) => {
     width: cutSheet.width,
     height: cutSheet.length,
   }
-  drawRectaangle(ctx, 20, 10, (parent.width - 50) * widthRatio, (parent.height - 50) * heightRatio, parent.width, parent.height, 'black');
-  drawRectaangle(ctx, 20, 10, (child.width - 50) * widthRatio, (child.height - 50) * heightRatio, child.width, child.height, 'red', true);
+  // get balance sheets
+  const label = "(" + child.height + " x " + child.width + ")";
+  drawRectangle(ctx, 20, 10, (parent.width - 50) * widthRatio, (parent.height - 50) * heightRatio, parent.width, parent.height, 'black');
+  drawRectangle(ctx, 20, 10, (child.width - 50) * widthRatio, (child.height - 50) * heightRatio, child.width, child.height, 'red','yellow',label, true);
+  const s = sheet;
+
+  for (let i = 0; i < s.length; i++) {
+    const balanceSheet = s[i];
+    let child = {
+      width: balanceSheet.width,
+      height: balanceSheet.length,
+    }
+    if (child.width + cutSheet.width > parent.width){
+      if(child.width == cutSheet.width && child.width == parent.width){
+
+      }else{
+        let tmp = child.width;
+        child.width = child.height;
+        child.height = tmp;
+      }
+    }
+    else if(child.height + cutSheet.length > parent.height){
+      let tmp = child.width;
+      child.width = child.height;
+      child.height = tmp;
+    }
+    if(child.width == parent.width-cutSheet.width){
+      // draw in top right corner
+      const label = "(" + child.height + " x " + child.width + ")";
+      drawRectangle(ctx, 20 + (cutSheet.width - 50) * widthRatio, 10, (child.width) * widthRatio, (child.height - 50) * heightRatio, child.width, child.height, 'blue', "#E8E8E8",label,true);
+    }else {
+      // draw in bottom left corner
+      const label = "(" + child.height + " x " + child.width + ")";
+      drawRectangle(ctx, 20, 10 + (cutSheet.length - 50) * heightRatio, (child.width - 50) * widthRatio, (child.height) * heightRatio, child.width, child.height, 'blue', "#E8E8E8",label,true);
+    }
+  }
+
+
 }
 const sheetStore = useSheetStore();
 const currentJob = ref<Job>();
@@ -230,7 +282,7 @@ const monthToSort = ref(Date.now());
   <OwnerLayout>
     <n-modal
         v-model:show="viewJobModel"
-        :on-after-enter="()=>{draw(sheetStore.getCutSheet(currentJob.jobID))}"
+        :on-after-enter="()=>{draw(sheetStore.getCutSheet(currentJob.jobID),currentJob.balanceSheets)}"
         title="View Job"
         :width="1000"
         :mask-closable="false"
@@ -590,7 +642,7 @@ const monthToSort = ref(Date.now());
           <thead>
           <tr class="text-center">
             <th>Job ID</th>
-            <th>Sheet ID</th>
+            <th>Job Name</th>
             <th>Started Time</th>
             <th>FinishedTime</th>
             <th>Time Elapsed</th>
@@ -608,7 +660,7 @@ const monthToSort = ref(Date.now());
           <tr v-for="job in pastJob" :key="job.jobID"
               v-if="pastJob.length > 0">
             <td>{{ job.jobID }}</td>
-            <td>{{ job.sheetID }}</td>
+            <td>{{ job.jobName }}</td>
             <td>{{ FormatDate(job.createdTime) }}</td>
             <td>{{ FormatDate(job.tasks.PlateFinishing.finishedTime) }}</td>
             <td>

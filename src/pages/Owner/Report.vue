@@ -4,8 +4,8 @@ import OwnerLayout from "@/Layout/OwnerLayout.vue";
 import {useSheetStore} from "../../store/sheetStore.ts";
 import {BalanceSheet} from "../../types/Types.ts";
 import {ref} from "vue";
-import {NCard, NModal} from "naive-ui";
-import {DocumentTextOutline} from "@vicons/ionicons5";
+import {NCard, NIcon, NModal} from "naive-ui";
+import {Close, DocumentTextOutline} from "@vicons/ionicons5";
 
 const sheetStore = useSheetStore();
 const selectedSheetsInCategory = ref<any>(null);
@@ -70,8 +70,14 @@ const fullBalanceSheetCount = (sheets:BalanceSheet[])=>{
         <div class="flex items-center text-black  justify-center w-full gap-2">
           <div class="flex items-center justify-center gap-2">
             <n-icon :component="DocumentTextOutline" size="large"/>
-            <n-text class="text-2xl font-bold">Sheet Ids</n-text>
+            <n-text class="text-2xl font-bold">Sheets</n-text>
           </div>
+        </div>
+      </template>
+      <template #header-extra>
+        <div class="flex items-center justify-center  w-full">
+          <n-icon :component="Close" size="large" @click="modalActive=false"
+                  class="w-8 h-8 flex items-center justify-center cursor-pointer hover:bg-red-500 hover:text-white hover:rounded-full p-1"/>
         </div>
       </template>
       <div class="flex flex-col flex-wrap items-center justify-center gap-2 p-2">

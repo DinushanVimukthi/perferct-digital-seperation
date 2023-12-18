@@ -150,6 +150,8 @@ const draw = (cutSheet: CutSheet,sheet:BalanceSheet[]) => {
           c.height = tmp;
         }
       }
+      console.log(c)
+
 
       rightCorner = true;
       const label = "(" + c.height + " x " + c.width + ")";

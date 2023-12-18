@@ -266,9 +266,11 @@ const draw = (cutSheet: CutSheet,sheet:BalanceSheet[]) => {
           c.height = tmp;
         }
       }
+      console.log(c)
+
 
       rightCorner = true;
-      const label = "(" + c.height + " x " + child.width + ")";
+      const label = "(" + c.height + " x " + c.width + ")";
       drawRectangle(ctx, 20 + (cutSheet.width - 50) * widthRatio, 10, (c.width) * widthRatio, (c.height - 50) * heightRatio, c.width, c.height, 'blue', "#E8E8E8",label,true);
     }else {
       // draw in bottom left corner

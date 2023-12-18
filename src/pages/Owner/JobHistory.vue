@@ -131,32 +131,39 @@ const draw = (cutSheet: CutSheet,sheet:BalanceSheet[]) => {
 
   for (let i = 0; i < s.length; i++) {
     const balanceSheet = s[i];
-    let child = {
+    let c = {
       width: balanceSheet.width,
       height: balanceSheet.length,
     }
-    if (child.width + cutSheet.width > parent.width){
-      if(child.width == cutSheet.width && child.width == parent.width){
+    let rightCorner = false;
 
-      }else{
-        let tmp = child.width;
-        child.width = child.height;
-        child.height = tmp;
-      }
-    }
-    else if(child.height + cutSheet.length > parent.height){
-      let tmp = child.width;
-      child.width = child.height;
-      child.height = tmp;
-    }
-    if(child.width == parent.width-cutSheet.width){
+    if(c.width == parent.width-cutSheet.width && !rightCorner){
       // draw in top right corner
-      const label = "(" + child.height + " x " + child.width + ")";
-      drawRectangle(ctx, 20 + (cutSheet.width - 50) * widthRatio, 10, (child.width) * widthRatio, (child.height - 50) * heightRatio, child.width, child.height, 'blue', "#E8E8E8",label,true);
+      if(c.height + cutSheet.length > parent.height && c.height != parent.height){
+        if(c.width<parent.width){
+
+        }else{
+          let tmp = c.width;
+          c.width = c.height;
+          c.height = tmp;
+        }
+      }
+      console.log(c)
+
+
+      rightCorner = true;
+      const label = "(" + c.height + " x " + c.width + ")";
+      drawRectangle(ctx, 20 + (cutSheet.width - 50) * widthRatio, 10, (c.width) * widthRatio, (c.height - 50) * heightRatio, c.width, c.height, 'blue', "#E8E8E8",label,true);
     }else {
       // draw in bottom left corner
-      const label = "(" + child.height + " x " + child.width + ")";
-      drawRectangle(ctx, 20, 10 + (cutSheet.length - 50) * heightRatio, (child.width - 50) * widthRatio, (child.height) * heightRatio, child.width, child.height, 'blue', "#E8E8E8",label,true);
+      if(c.height + cutSheet.length > parent.height){
+        let tmp = c.width;
+        c.width = c.height;
+        c.height = tmp;
+      }
+
+      const label = "(" + c.height + " x " + c.width + ")";
+      drawRectangle(ctx, 20, 10 + (cutSheet.length - 50) * heightRatio, (c.width - 50) * widthRatio, (c.height) * heightRatio, c.width, c.height, 'blue', "#E8E8E8",label,true);
     }
   }
 

@@ -20,7 +20,7 @@ import {Collections20Regular } from "@vicons/fluent";
 import {useJobStore} from "@store/jobStore.ts";
 import moment from "moment";
 import {ref,computed} from "vue";
-import {CutSheet, Job, Task} from "@/types/Types.ts";
+import {BalanceSheet, CutSheet, Job, Task} from "@/types/Types.ts";
 import {useSheetStore} from "@store/sheetStore.ts";
 import {JobType} from "@/types/JobType.ts";
 import {useAdminStore} from "@store/adminStore.ts";
@@ -91,23 +91,71 @@ const drawRectaangle = (ctx, x, y, width, height,labelWidth,labelHeight, color,c
 };
 
 const canvasRef = ref<HTMLCanvasElement>();
-const draw = (cutSheet:CutSheet) =>{
-  const canvas:HTMLCanvasElement = canvasRef.value as HTMLCanvasElement;
+const draw = (cutSheet: CutSheet,sheet:BalanceSheet[]) => {
+  console.log(sheet);
+  const canvas: HTMLCanvasElement = canvasRef.value as HTMLCanvasElement;
   const ctx = canvas.getContext('2d');
-  const canvasWidth = canvas.width-20;
-  const canvasHeight = canvas.height-20;
-  const parent= {
+  if (!ctx) {
+    return;
+  }
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  const canvasWidth = canvas.width - 20;
+  const canvasHeight = canvas.height - 20;
+  const parent = {
     width: cutSheet.parentWidth,
     height: cutSheet.parentLength,
   }
-  const heightRatio = canvasHeight/parent.height;
-  const widthRatio = canvasWidth/parent.width;
+  const heightRatio = canvasHeight / parent.height;
+  const widthRatio = canvasWidth / parent.width;
   const child = {
     width: cutSheet.width,
     height: cutSheet.length,
   }
-  drawRectaangle(ctx, 20, 10, (parent.width-50) * widthRatio, (parent.height-50) * heightRatio,parent.width,parent.height, 'black');
-  drawRectaangle(ctx, 20, 10, (child.width-50) * widthRatio, (child.height-50)  * heightRatio,child.width,child.height, 'red',true);
+  // get balance sheets
+  const label = "(" + child.height + " x " + child.width + ")";
+  drawRectangle(ctx, 20, 10, (parent.width - 50) * widthRatio, (parent.height - 50) * heightRatio, parent.width, parent.height, 'black');
+  drawRectangle(ctx, 20, 10, (child.width - 50) * widthRatio, (child.height - 50) * heightRatio, child.width, child.height, 'red','yellow',label, true);
+  const s = sheet;
+
+  for (let i = 0; i < s.length; i++) {
+    const balanceSheet = s[i];
+    let c = {
+      width: balanceSheet.width,
+      height: balanceSheet.length,
+    }
+    let rightCorner = false;
+
+    if(c.width == parent.width-cutSheet.width && !rightCorner){
+      // draw in top right corner
+      if(c.height + cutSheet.length > parent.height && c.height != parent.height){
+        if(c.width<parent.width){
+
+        }else{
+          let tmp = c.width;
+          c.width = c.height;
+          c.height = tmp;
+        }
+      }
+      console.log(c)
+
+
+      rightCorner = true;
+      const label = "(" + c.height + " x " + c.width + ")";
+      drawRectangle(ctx, 20 + (cutSheet.width - 50) * widthRatio, 10, (c.width) * widthRatio, (c.height - 50) * heightRatio, c.width, c.height, 'blue', "#E8E8E8",label,true);
+    }else {
+      // draw in bottom left corner
+      if(c.height + cutSheet.length > parent.height){
+        let tmp = c.width;
+        c.width = c.height;
+        c.height = tmp;
+      }
+
+      const label = "(" + c.height + " x " + c.width + ")";
+      drawRectangle(ctx, 20, 10 + (cutSheet.length - 50) * heightRatio, (c.width - 50) * widthRatio, (c.height) * heightRatio, c.width, c.height, 'blue', "#E8E8E8",label,true);
+    }
+  }
+
+
 }
 const sheetStore = useSheetStore();
 const currentJob =ref<Job>();

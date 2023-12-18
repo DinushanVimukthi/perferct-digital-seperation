@@ -62,18 +62,23 @@ const login =async () => {
     loaderStore.setLoading(false);
 }
 }
-
+const year = new Date().getFullYear();
 </script>
 
 <template>
   <div class="flex h-screen w-screen items-center justify-center">
-    <div class="flex w-8/12 h-4/5 flex-center">
+    <div class="flex flex-wrap w-8/12  h-4/5 flex-center">
       <div class="w-1/2 flex flex-col items-center justify-center">
         <img src="@assets/Images/logo.png" alt="logo" class="" />
       </div>
       <div class="w-1/2 h-full flex flex-col items-center justify-center gap-2">
-        <div class="bg-white h-3/4 w-8/12 rounded-3xl shadow-lg p-8">
+        <div class="bg-white h-3/4 w-8/12 min-w-[400px] min-h-[600px] rounded-3xl shadow-lg p-8">
           <form class="flex flex-col h-5/6 justify-center" @submit.prevent="login">
+            <h1 class="text-2xl font-semibold mb-6 text-center">
+              Welcome, <br/><span class=" text-4xl font-bold text-blue-600">
+              Perfect Digital Seperation
+            </span>
+            </h1>
             <h2 class="text-3xl font-semibold mb-6 text-center">
               Sign In 
             </h2>
@@ -102,6 +107,11 @@ const login =async () => {
     <img src="@assets/Icons/triangleGroup.svg" alt="triangleGroup" class="absolute bottom-0 right-0 transform -rotate-90"  />
     <img src="@assets/Icons/triangleGroup.svg" alt="triangleGroup" class="absolute top-0 right-0 transform rotate-180" />
   </div>
+  <footer class="absolute bottom-0 w-full flex justify-center items-center">
+    <p class="text-gray-400 text-sm">
+      © {{year}} All Rights Reserved.   <span class="text-blue-500">DVTech</span>
+    </p>
+  </footer>
 </template>
 
 <style scoped>

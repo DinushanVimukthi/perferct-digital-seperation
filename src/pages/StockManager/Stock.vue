@@ -15,7 +15,6 @@ const sheetsSummarized = computed(() => {
     const index = summarizedSheets.findIndex((summarizedSheet:Sheet) => {
       return summarizedSheet.thickness === sheet.thickness && summarizedSheet.width === sheet.width && summarizedSheet.length === sheet.length
     })
-    console.log(index)
     if (index === -1){
       summarizedSheets.push({
         sheetID: sheet.sheetID.split('_')[0],
@@ -29,7 +28,6 @@ const sheetsSummarized = computed(() => {
       summarizedSheets[index].count += 1
     }
   })
-  console.log(values)
   return summarizedSheets
 })
 
@@ -69,7 +67,6 @@ const openAddModal = async () => {
   form.value.sheetID = sheetStore.getLastSheetID
 };
 const openEditModal = async (sheet:Sheet) => {
-  console.log(sheetsSummarized.value)
   selectedSheet.value = sheet
   editSheetModal.value = true;
 };

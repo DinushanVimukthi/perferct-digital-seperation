@@ -41,7 +41,7 @@ import {useUserStore} from "/src/store/UserStore.ts";
 const jobStore = useJobStore();
 const sheetStore = useSheetStore();
 const userStore = useUserStore();
-
+const sheetToAdd = ref<Sheet>();
 
 const notification = useNotification();
 const notify = (type: NotificationType, title: string, message: string) => {
@@ -183,16 +183,17 @@ const balanceSheets = (sheet: Sheet) => {
     }else{
       remainingSheets.push({
         sheetID: sheet.sheetID,
-        width: job.value.width,
-        length: remainingLength,
-        selected: false
-      })
-      remainingSheets.push({
-        sheetID: sheet.sheetID,
         width: remainingWidth,
         length: sheet.length,
         selected: false
       })
+      remainingSheets.push({
+        sheetID: sheet.sheetID,
+        width: job.value.width,
+        length: remainingLength,
+        selected: false
+      })
+
     }
   }
   return remainingSheets;
@@ -216,20 +217,22 @@ const addJob = () => {
 
     job.value.jobID = jobStore.getLastJobID;
     job.value.createdTime = new Date().toLocaleString();
+
+
     job.value.currentStatus = "Pending";
     job.value.createdBy = userStore.getUser.userID;
     job.value.createdTime = new Date().toLocaleString();
+    job.value.parentSheetLength = sheetToAdd.value.length;
+    job.value.parentSheetWidth = sheetToAdd.value.width;
 
     const balanceSheet = sheetStore.getBalanceSheet;
-    let sheet = balanceSheet.find((s) => s.bSheetID === job.value.bSheetID);
+    let sheet = balanceSheet.find((s:Sheet) => s.bSheetID.trim() !== "" && s.bSheetID=== job.value.bSheetID);
     if (!sheet) {
       sheet = sheetStore.getSheet(job.value.sheetID);
     }
     //check sheet width and length are more or equal to job width and length
-    if (sheet.width < job.value.width || sheet.length < job.value.length) {
-      notify("error", "Error", "Sheet width or length is less than job width or length")
-      return
-    }
+
+
 
     const bSheets: BalanceSheet[] = [];
     for (let i = 0; i < balanceSheets(sheet).length; i++) {
@@ -362,11 +365,11 @@ const sheets = computed(() => {
     sheetSelected.value = true;
     job.value.sheetID = SelectedSheets[0].sheetID;
     job.value.bSheetID = SelectedSheets[0].bSheetID ?? null;
-    console.log(SelectedSheets[0])
     balanceSheetID.value = SelectedSheets[0].bSheetID ?? null;
     setTimeout(() => {
       if (job.value.length > 0 && job.value.width > 0) {
         viewSheet(SelectedSheets[0]);
+        sheetToAdd.value = SelectedSheets[0];
       }
     }, 100);
   }
@@ -380,6 +383,7 @@ const SelectSheet = (sheet: Sheet) => {
     job.value.sheetID = sheet.sheetID;
     sheets.value[sheets.value.findIndex((item: Sheet) => item.sheetID == sheet.sheetID)].selected = true;
     viewSheet(sheet);
+    sheetToAdd.value = sheet;
 
   } else {
     notify('warning', 'Warning', 'You have already selected a sheet')
@@ -461,7 +465,7 @@ const drawRectangle = (ctx: CanvasRenderingContext2D, x: number, y: number, widt
   ctx.fillText(`${parseFloat(labelHeight.toString()).toFixed(0)} mm`, heightLabelX, heightLabelY);
   // add name to center
   if(name!=""){
-    ctx.fillText(`${name}`, widthLabelX, heightLabelY + 50);
+    ctx.fillText(`${name}`, widthLabelX, heightLabelY + 10);
   }
   // fill color
 };
@@ -490,21 +494,44 @@ const draw = (cutSheet: CutSheet,sheet:BalanceSheet[]) => {
   drawRectangle(ctx, 20, 10, (parent.width - 50) * widthRatio, (parent.height - 50) * heightRatio, parent.width, parent.height, 'black');
   drawRectangle(ctx, 20, 10, (child.width - 50) * widthRatio, (child.height - 50) * heightRatio, child.width, child.height, 'red','yellow',label, true);
   const s = sheet;
-
+  let rightCorner = false;
   for (let i = 0; i < s.length; i++) {
     const balanceSheet = s[i];
-    let child = {
+    let c = {
       width: balanceSheet.width,
       height: balanceSheet.length,
     }
-    if(child.width == parent.width-cutSheet.width){
+
+
+    if(c.width == parent.width-cutSheet.width && !rightCorner){
       // draw in top right corner
-      const label = "(" + child.height + " x " + child.width + ")";
-      drawRectangle(ctx, 20 + (cutSheet.width - 50) * widthRatio, 10, (child.width) * widthRatio, (child.height - 50) * heightRatio, child.width, child.height, 'blue', "#E8E8E8",label,true);
+      console.log(c.height,parent.height,cutSheet.length)
+      console.log(c.width,parent.width,cutSheet.width)
+      if(c.height + cutSheet.length > parent.height && c.height != parent.height){
+        if(c.width<parent.width){
+
+        }else{
+          let tmp = c.width;
+          c.width = c.height;
+          c.height = tmp;
+        }
+
+      }
+      rightCorner = true;
+
+      const label = "(" + c.height + " x " + c.width + ")";
+      drawRectangle(ctx, 20 + (cutSheet.width - 50) * widthRatio, 10, (c.width) * widthRatio, (c.height - 50) * heightRatio, c.width, c.height, 'blue', "#E8E8E8",label,true);
     }else {
       // draw in bottom left corner
-      const label = "(" + child.height + " x " + child.width + ")";
-      drawRectangle(ctx, 20, 10 + (cutSheet.length - 50) * heightRatio, (child.width - 50) * widthRatio, (child.height) * heightRatio, child.width, child.height, 'blue', "#E8E8E8",label,true);
+      console.log(c.height,parent.height,cutSheet.length)
+      if(c.height + cutSheet.length > parent.height){
+        let tmp = c.width;
+        c.width = c.height;
+        c.height = tmp;
+      }
+
+      const label = "(" + c.height + " x " + c.width + ")";
+      drawRectangle(ctx, 20, 10 + (cutSheet.length - 50) * heightRatio, (c.width - 50) * widthRatio, (c.height) * heightRatio, c.width, c.height, 'blue', "#E8E8E8",label,true);
     }
   }
 
@@ -539,32 +566,39 @@ const draw_view = (cutSheet: CutSheet,sheet:BalanceSheet[]) => {
 
   for (let i = 0; i < s.length; i++) {
     const balanceSheet = s[i];
-    let child = {
+    let c = {
       width: balanceSheet.width,
       height: balanceSheet.length,
     }
-    if (child.width + cutSheet.width > parent.width){
-      if(child.width == cutSheet.width && child.width == parent.width){
+    let rightCorner = false;
 
-      }else{
-        let tmp = child.width;
-        child.width = child.height;
-        child.height = tmp;
-      }
-    }
-    else if(child.height + cutSheet.length > parent.height){
-      let tmp = child.width;
-      child.width = child.height;
-      child.height = tmp;
-    }
-    if(child.width == parent.width-cutSheet.width){
+    if(c.width == parent.width-cutSheet.width && !rightCorner){
       // draw in top right corner
-      const label = "(" + child.height + " x " + child.width + ")";
-      drawRectangle(ctx, 20 + (cutSheet.width - 50) * widthRatio, 10, (child.width) * widthRatio, (child.height - 50) * heightRatio, child.width, child.height, 'blue', "#E8E8E8",label,true);
+      if(c.height + cutSheet.length > parent.height && c.height != parent.height){
+        if(c.width<parent.width){
+
+        }else{
+          let tmp = c.width;
+          c.width = c.height;
+          c.height = tmp;
+        }
+      }
+      console.log(c)
+
+
+      rightCorner = true;
+      const label = "(" + c.height + " x " + c.width + ")";
+      drawRectangle(ctx, 20 + (cutSheet.width - 50) * widthRatio, 10, (c.width) * widthRatio, (c.height - 50) * heightRatio, c.width, c.height, 'blue', "#E8E8E8",label,true);
     }else {
       // draw in bottom left corner
-      const label = "(" + child.height + " x " + child.width + ")";
-      drawRectangle(ctx, 20, 10 + (cutSheet.length - 50) * heightRatio, (child.width - 50) * widthRatio, (child.height) * heightRatio, child.width, child.height, 'blue', "#E8E8E8",label,true);
+      if(c.height + cutSheet.length > parent.height){
+        let tmp = c.width;
+        c.width = c.height;
+        c.height = tmp;
+      }
+
+      const label = "(" + c.height + " x " + c.width + ")";
+      drawRectangle(ctx, 20, 10 + (cutSheet.length - 50) * heightRatio, (c.width - 50) * widthRatio, (c.height) * heightRatio, c.width, c.height, 'blue', "#E8E8E8",label,true);
     }
   }
 

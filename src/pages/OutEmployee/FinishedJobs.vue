@@ -101,7 +101,8 @@ const drawRectangle = (ctx: CanvasRenderingContext2D, x: number, y: number, widt
   // fill color
 };
 
-const draw= (cutSheet: CutSheet,sheet:BalanceSheet[]) => {
+const draw = (cutSheet: CutSheet,sheet:BalanceSheet[]) => {
+  console.log(sheet);
   const canvas: HTMLCanvasElement = canvasRef.value as HTMLCanvasElement;
   const ctx = canvas.getContext('2d');
   if (!ctx) {
@@ -128,31 +129,36 @@ const draw= (cutSheet: CutSheet,sheet:BalanceSheet[]) => {
 
   for (let i = 0; i < s.length; i++) {
     const balanceSheet = s[i];
-    let child = {
+    let c = {
       width: balanceSheet.width,
       height: balanceSheet.length,
     }
-    if (child.width + cutSheet.width > parent.width){
-      if(child.width == cutSheet.width && child.width == parent.width){
-
-      }else{
-        let tmp = child.width;
-        child.width = child.height;
-        child.height = tmp;
-      }
-    }else if(child.height + cutSheet.length > parent.height){
-      let tmp = child.width;
-      child.width = child.height;
-      child.height = tmp;
-    }
-    if(child.width == parent.width-cutSheet.width){
+    let rightCorner = false;
+    if(c.width == parent.width-cutSheet.width && !rightCorner){
       // draw in top right corner
-      const label = "(" + child.height + " x " + child.width + ")";
-      drawRectangle(ctx, 20 + (cutSheet.width - 50) * widthRatio, 10, (child.width) * widthRatio, (child.height - 50) * heightRatio, child.width, child.height, 'blue', "#E8E8E8",label,true);
+      if(c.height + cutSheet.length > parent.height && c.height != parent.height){
+        if(c.width<parent.width){
+
+        }else{
+          let tmp = c.width;
+          c.width = c.height;
+          c.height = tmp;
+        }
+      }
+
+      rightCorner = true;
+      const label = "(" + c.height + " x " + child.width + ")";
+      drawRectangle(ctx, 20 + (cutSheet.width - 50) * widthRatio, 10, (c.width) * widthRatio, (c.height - 50) * heightRatio, c.width, c.height, 'blue', "#E8E8E8",label,true);
     }else {
       // draw in bottom left corner
-      const label = "(" + child.height + " x " + child.width + ")";
-      drawRectangle(ctx, 20, 10 + (cutSheet.length - 50) * heightRatio, (child.width - 50) * widthRatio, (child.height) * heightRatio, child.width, child.height, 'blue', "#E8E8E8",label,true);
+      if(c.height + cutSheet.length > parent.height){
+        let tmp = c.width;
+        c.width = c.height;
+        c.height = tmp;
+      }
+
+      const label = "(" + c.height + " x " + c.width + ")";
+      drawRectangle(ctx, 20, 10 + (cutSheet.length - 50) * heightRatio, (c.width - 50) * widthRatio, (c.height) * heightRatio, c.width, c.height, 'blue', "#E8E8E8",label,true);
     }
   }
 
@@ -378,25 +384,35 @@ const timeDifference = (startTime:string,endTime:string)=>{
               </div>
             </div>
             <div class="flex w-full justify-center items-center border-2 rounded-2xl">
+              <div class="flex w-1/2 flex-col">
+                <div class="text-xl font-bold text-center mb-3">
+                  Balance Sheets
+                </div>
+                <div class="flex w-full gap-2 flex-col">
+                  <div class="flex w-full gap-3 items-center justify-center">
+                    <!--  Balaance Sheets -->
+                    <div class="flex flex-col items-center px-6 justify-around gap-2 rounded-lg p-2">
+                      <div class="text-md font-bold py-2 px-3 rounded-2xl bg-blue-300" v-for="sheet in currentJob.balanceSheets" :key="sheet.sheetID">
+                        {{sheet.length}}mm x {{sheet.width}}mm
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
               <div class="flex w-1/2 flex-col gap-2 p-2">
                 <div class="text-xl font-bold text-center mb-3">
                   Cut Details
                 </div>
                 <div class="flex w-full gap-2 flex-col">
-                  <div class="flex">
-                    <div class="flex font-bold w-2/3 items-center justify-center px-3">
-                      Width :
+                  <div class="flex text-xl py-2 rounded bg-amber-300">
+                    <div class="flex flex-col font-bold w-2/3 items-center justify-center px-3">
+                      <div>Cut Length :</div>
+                      <div>
+                        (length x width)
+                      </div>
                     </div>
-                    <div class="flex w-3/4 items-center justify-start px-2">
-                      {{currentJob.width}}mm
-                    </div>
-                  </div>
-                  <div class="flex">
-                    <div class="flex font-bold w-2/3 items-center justify-center px-3">
-                      Length :
-                    </div>
-                    <div class="flex w-3/4 items-center justify-start px-2">
-                      {{currentJob.length}}mm
+                    <div class="flex font-bold text-xl w-3/4 items-center justify-start px-2">
+                      {{currentJob.length}}mm x {{currentJob.width}}mm
                     </div>
                   </div>
                   <div class="flex">

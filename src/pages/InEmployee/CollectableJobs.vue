@@ -104,7 +104,8 @@ const draw = (cutSheet: CutSheet,sheet:Sheet) => {
   const label = "(" + child.height + " x " + child.width + ")";
   drawRectangle(ctx, 20, 10, (parent.width - 50) * widthRatio, (parent.height - 50) * heightRatio, parent.width, parent.height, 'black');
   drawRectangle(ctx, 20, 10, (child.width - 50) * widthRatio, (child.height - 50) * heightRatio, child.width, child.height, 'red','yellow',label, true);
-  const s = sheet.balanceSheets;
+  const s = sheet;
+  console.log(sheet)
   for (let i = 0; i < s.length; i++) {
     const balanceSheet = s[i];
     const child = {
@@ -171,7 +172,7 @@ const collectJob = (job:any) => {
   <InEmployeeLayout>
     <n-modal
         v-model:show="viewJobModel"
-        :on-after-enter="()=>{draw(sheetStore.getCutSheet(currentJob.jobID))}"
+        :on-after-enter="()=>{draw(sheetStore.getCutSheet(currentJob.jobID),currentJob.balanceSheets)}"
         title="View Job"
         :width="1000"
         :mask-closable="false"

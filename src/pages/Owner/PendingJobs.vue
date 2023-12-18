@@ -507,6 +507,7 @@ const getTask = (tasks) => {
       <n-table striped size="small" border="outer" class="w-full text-center">
         <thead>
         <tr>
+          <th>Job Name</th>
           <th>Job ID</th>
           <th>Sheet ID</th>
           <th>Submitted Time</th>
@@ -517,6 +518,7 @@ const getTask = (tasks) => {
         </thead>
         <tbody>
         <tr v-for="job in jobStore.getPendingJobs" :key="job.jobID" v-if="jobStore.getPendingJobs.length > 0">
+          <td>{{job.jobName}}</td>
           <td>{{job.jobID}}</td>
           <td>{{job.sheetID}}</td>
           <td>{{job.createdTime}}</td>

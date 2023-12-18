@@ -3,6 +3,8 @@ interface Job {
     jobName: string;
     width: number;
     length: number;
+    parentSheetWidth: number;
+    parentSheetLength: number;
     remarks: string;
     createdTime: Date;
     createdBy: string;
@@ -99,4 +101,4 @@ interface OutEmployeeUser {
     lastActive: Date;
 }
 
-export type { Job, Sheet, CutSheet, Task, Issue, Subject, User, OutEmployeeUser, Design,BalanceSheet     };
+export type { Job, Sheet, CutSheet, Task, Issue, Subject, User, OutEmployeeUser, Design,BalanceSheet};

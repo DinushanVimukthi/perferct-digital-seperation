@@ -63,6 +63,8 @@ export const useSheetStore = defineStore('sheetStore', {
                     disabled:false,
                 }
             }
+            //sort array by thickness ascending
+            thicknessArray.sort((a, b) => (a.value > b.value) ? 1 : -1);
             // Remove duplicates
             return thicknessArray.filter((thing, index, self) =>
                     index === self.findIndex((t) => (
@@ -82,6 +84,7 @@ export const useSheetStore = defineStore('sheetStore', {
                             balanceSheetArray[i++] = {
                                 sheetID: sheet.sheetID,
                                 thickness: sheet.thickness,
+                                stockType: sheet.stockType,
                                 width: sheet.balanceSheets[bSheet].width,
                                 length: sheet.balanceSheets[bSheet].length,
                                 bSheetID: sheet.balanceSheets[bSheet].bSheetID,
@@ -92,6 +95,7 @@ export const useSheetStore = defineStore('sheetStore', {
                             sheetID: sheet.sheetID,
                             thickness: sheet.thickness,
                             width: sheet.width,
+                            stockType: sheet.stockType,
                             length: sheet.length,
                             bSheetID: '',
                         }

@@ -445,7 +445,7 @@ const collectJob = (job:any) => {
             <td>{{job.width}} x {{job.length}}</td>
             <td>{{useSheetStore().getSheet(job.sheetID).thickness}} mm</td>
             <td>{{FormatDate(job.createdTime)}}</td>
-            <td>{{FormatDate(job.tasks.PlateFinishing.finishedTime)}}</td>
+            <td>{{FormatDate(job.tasks.PlateDrying.finishedTime)}}</td>
             <td>{{job.currentStatus}}</td>
             <td class="flex items-center justify-center gap-2">
               <n-button class="bg-green-50  border border-green-700 px-2 py-1 rounded flex gap-1 items-center justify-center hover:bg-green-700 hover:text-white"

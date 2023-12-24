@@ -153,7 +153,7 @@ export const useJobStore = defineStore('jobStore', {
             console.log(task)
             console.log(job);
             console.log(jobID)
-            task.finishedTime = new Date().toISOString();
+            task.finishedTime = new Date().toString();
             task.finishedBy = userID;
             await updateTask(jobID,taskName,task);
         },

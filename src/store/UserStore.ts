@@ -63,6 +63,9 @@ export const useUserStore = defineStore('userStore', {
                 const userID=credential.user?.uid
                 if (typeof userID === "string") {
                     const user = await getUserFromDB(userID)
+                    if(user === null){
+                        throw new Error("User not found! Please contact the administrator.")
+                    }
                     localStorage.setItem("userID", userID)
                     localStorage.setItem("userRole", user.userRole)
                     this.setUser(user)

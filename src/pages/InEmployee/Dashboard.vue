@@ -42,6 +42,7 @@ const jobStore = useJobStore();
 const sheetStore = useSheetStore();
 const userStore = useUserStore();
 const sheetToAdd = ref<Sheet>();
+const selectedSheet = ref<Sheet>();
 
 const notification = useNotification();
 const notify = (type: NotificationType, title: string, message: string) => {
@@ -54,7 +55,7 @@ const notify = (type: NotificationType, title: string, message: string) => {
 }
 
 const dateDisabled= (ts:number)=>{
-  return ts < Date.now()
+  return ts < Date.now() - 8.64e+7;
 }
 
 const priorities = [
@@ -166,7 +167,6 @@ const balanceSheets = (sheet: Sheet) => {
     let minB = B1 < B2 ? B1 : B2;
     let maxB = B1 > B2 ? B1 : B2;
     let B = minB / maxB;
-    console.log(A,B);
     if(A>B){
       remainingSheets.push({
         sheetID: sheet.sheetID,
@@ -206,13 +206,15 @@ const addJob = () => {
   if (job.value.sheetID === "" && job.value.sheetID === "") {
     notify("error", "Error", "Please select a sheet")
     return
-  } else if (job.value.jobName.trim() === "") {
+  }
+    else if (job.value.jobName.trim() === "") {
     notify("error", "Error", "Please enter a job name")
     return
   } else if (job.value.deadLine == null) {
     notify("error", "Error", "Please select a deadline")
     return
-  } else
+  }
+  else
   {
 
     job.value.jobID = jobStore.getLastJobID;
@@ -231,6 +233,11 @@ const addJob = () => {
       sheet = sheetStore.getSheet(job.value.sheetID);
     }
     //check sheet width and length are more or equal to job width and length
+    if(job.value.length < job.value.width){
+      let tmp = job.value.length;
+      job.value.length = job.value.width;
+      job.value.width = tmp;
+    }
 
 
 
@@ -239,8 +246,8 @@ const addJob = () => {
       const balanceSheet = balanceSheets(sheet)[i];
       bSheets.push({
         bSheetID: job.value.sheetID + "_" + Math.random().toString(36).substr(2, 4),
-        width: balanceSheet.width < balanceSheet.length ? balanceSheet.width : balanceSheet.length,
-        length: balanceSheet.length >= balanceSheet.width ? balanceSheet.length : balanceSheet.width,
+        width: balanceSheet.width,
+        length: balanceSheet.length,
       })
     }
     job.value.balanceSheets = bSheets;
@@ -329,13 +336,37 @@ const balanceSheetID = ref<string>("")
 
 const availableSheets = ref(sheetStore.getBalanceSheet);
 const sheets = computed(() => {
+  let length = job.value.length;
+  let width = job.value.width;
+  if(job.value.length < job.value.width){
+    let tmp = job.value.length;
+    length = job.value.width;
+    width = tmp;
+  }
   let SelectedSheets = availableSheets.value.filter((sheet: Sheet) => {
     return sheet.thickness == Number(thickness.value);
   });
-
-  SelectedSheets = SelectedSheets.filter((sheet: Sheet) => {
-    return sheet.length >= job.value.length && sheet.width >= job.value.width;
+  let SecondarySheet = SelectedSheets.filter((sheet: Sheet) => {
+    return (sheet.length >= job.value.width && sheet.width >= job.value.length);
   })
+  SelectedSheets = SelectedSheets.filter((sheet: Sheet) => {
+    return (sheet.length >= job.value.length && sheet.width >= job.value.width);
+  })
+
+
+
+  //exchange secondary sheet length and width
+  SecondarySheet.forEach((sheet: Sheet) => {
+    let tmp = sheet.length;
+    sheet.length = sheet.width;
+    sheet.width = tmp;
+  })
+
+  //add secondary sheets to selected sheets
+  SelectedSheets = SelectedSheets.concat(SecondarySheet);
+
+
+
   SelectedSheets.sort((a: Sheet, b: Sheet) => {
     return calculateFillPercentage(b) - calculateFillPercentage(a);
   });
@@ -448,7 +479,8 @@ const drawRectangle = (ctx: CanvasRenderingContext2D, x: number, y: number, widt
   const widthLabelX = x + width / 2
   let widthLabelY = y + height - 5;
   if (child) {
-    widthLabelY = y - 5;
+    widthLabelY = y - 5
+    console.log(width, height)
   }
   const heightLabelX = x + width - 20;
   const heightLabelY = y + height / 2;
@@ -494,6 +526,7 @@ const draw = (cutSheet: CutSheet,sheet:BalanceSheet[]) => {
   drawRectangle(ctx, 20, 10, (parent.width - 50) * widthRatio, (parent.height - 50) * heightRatio, parent.width, parent.height, 'black');
   drawRectangle(ctx, 20, 10, (child.width - 50) * widthRatio, (child.height - 50) * heightRatio, child.width, child.height, 'red','yellow',label, true);
   const s = sheet;
+  console.log(s)
   let rightCorner = false;
   for (let i = 0; i < s.length; i++) {
     const balanceSheet = s[i];
@@ -501,12 +534,8 @@ const draw = (cutSheet: CutSheet,sheet:BalanceSheet[]) => {
       width: balanceSheet.width,
       height: balanceSheet.length,
     }
-
-
     if(c.width == parent.width-cutSheet.width && !rightCorner){
       // draw in top right corner
-      console.log(c.height,parent.height,cutSheet.length)
-      console.log(c.width,parent.width,cutSheet.width)
       if(c.height + cutSheet.length > parent.height && c.height != parent.height){
         if(c.width<parent.width){
 
@@ -523,7 +552,6 @@ const draw = (cutSheet: CutSheet,sheet:BalanceSheet[]) => {
       drawRectangle(ctx, 20 + (cutSheet.width - 50) * widthRatio, 10, (c.width) * widthRatio, (c.height - 50) * heightRatio, c.width, c.height, 'blue', "#E8E8E8",label,true);
     }else {
       // draw in bottom left corner
-      console.log(c.height,parent.height,cutSheet.length)
       if(c.height + cutSheet.length > parent.height){
         let tmp = c.width;
         c.width = c.height;
@@ -539,7 +567,6 @@ const draw = (cutSheet: CutSheet,sheet:BalanceSheet[]) => {
 }
 
 const draw_view = (cutSheet: CutSheet,sheet:BalanceSheet[]) => {
-  console.log(sheet);
   const canvas: HTMLCanvasElement = canvasRef.value as HTMLCanvasElement;
   const ctx = canvas.getContext('2d');
   if (!ctx) {
@@ -561,48 +588,44 @@ const draw_view = (cutSheet: CutSheet,sheet:BalanceSheet[]) => {
   // get balance sheets
   const label = "(" + child.height + " x " + child.width + ")";
   drawRectangle(ctx, 20, 10, (parent.width - 50) * widthRatio, (parent.height - 50) * heightRatio, parent.width, parent.height, 'black');
-  drawRectangle(ctx, 20, 10, (child.width - 50) * widthRatio, (child.height - 50) * heightRatio, child.width, child.height, 'red','yellow',label, true);
+  drawRectangle(ctx, 20, 10, (child.width - 50) * widthRatio, (child.height - 50) * heightRatio, child.width, child.height, 'red', 'yellow', label, true);
   const s = sheet;
-
+  console.log(s)
+  let rightCorner = false;
   for (let i = 0; i < s.length; i++) {
     const balanceSheet = s[i];
     let c = {
       width: balanceSheet.width,
       height: balanceSheet.length,
     }
-    let rightCorner = false;
-
-    if(c.width == parent.width-cutSheet.width && !rightCorner){
+    if (c.width == parent.width - cutSheet.width && !rightCorner) {
       // draw in top right corner
-      if(c.height + cutSheet.length > parent.height && c.height != parent.height){
-        if(c.width<parent.width){
+      if (c.height + cutSheet.length > parent.height && c.height != parent.height) {
+        if (c.width < parent.width) {
 
-        }else{
+        } else {
           let tmp = c.width;
           c.width = c.height;
           c.height = tmp;
         }
+
       }
-      console.log(c)
-
-
       rightCorner = true;
+
       const label = "(" + c.height + " x " + c.width + ")";
-      drawRectangle(ctx, 20 + (cutSheet.width - 50) * widthRatio, 10, (c.width) * widthRatio, (c.height - 50) * heightRatio, c.width, c.height, 'blue', "#E8E8E8",label,true);
-    }else {
+      drawRectangle(ctx, 20 + (cutSheet.width - 50) * widthRatio, 10, (c.width) * widthRatio, (c.height - 50) * heightRatio, c.width, c.height, 'blue', "#E8E8E8", label, true);
+    } else {
       // draw in bottom left corner
-      if(c.height + cutSheet.length > parent.height){
+      if (c.height + cutSheet.length > parent.height) {
         let tmp = c.width;
         c.width = c.height;
         c.height = tmp;
       }
 
       const label = "(" + c.height + " x " + c.width + ")";
-      drawRectangle(ctx, 20, 10 + (cutSheet.length - 50) * heightRatio, (c.width - 50) * widthRatio, (c.height) * heightRatio, c.width, c.height, 'blue', "#E8E8E8",label,true);
+      drawRectangle(ctx, 20, 10 + (cutSheet.length - 50) * heightRatio, (c.width - 50) * widthRatio, (c.height) * heightRatio, c.width, c.height, 'blue', "#E8E8E8", label, true);
     }
   }
-
-
 }
 
 const viewSheet = (selectedSheet: Sheet) => {
@@ -673,7 +696,7 @@ const deleteJob = (job: Job) => {
         class="w-1/2 rounded-2xl"
     >
       <n-card
-          class="w-4/5 rounded-2xl"
+          class="w-full rounded-2xl"
           title="Add New Job"
           header-style="background-color: #476ECA;text-align: center;font-size: 20px;font-weight: 600;border-radius: 10px 10px 0 0;text-color: #fff;"
           footer-style="background-color: #fff;padding: 10px 20px;text-align: center; border-radius: 0 0 10px 10px;"
@@ -727,6 +750,7 @@ const deleteJob = (job: Job) => {
                         :is-date-disabled="dateDisabled"
                         type="datetime"
                         clearable
+                        :update-value-on-close="true"
                     />
                   </n-input-group>
                 </div>
@@ -781,7 +805,7 @@ const deleteJob = (job: Job) => {
               <tbody>
               <tr v-for="sheet in sheets" :key="sheet.sheetID" v-if="sheets.length>0 && job.length>10 && job.width>10">
                 <td>
-                  {{ sheet.sheetID }}
+                  {{ sheet.sheetID }} ( {{sheet.stockType}} )
                 </td>
                 <td
                     class="flex items-center justify-center">
@@ -856,7 +880,7 @@ const deleteJob = (job: Job) => {
           :bordered="false"
           class="rounded-2xl"
           :body-style="{ padding: '0px' }"
-          :style="{ width: '95%' }"
+          :style="{ width: '100%' }"
       >
         <template #header>
           <div class="flex items-center justify-center w-full gap-2">
@@ -938,19 +962,9 @@ const deleteJob = (job: Job) => {
                     </div>
                   </div>
                   <div class="flex">
-                    <div class="flex font-bold w-2/3 items-center justify-center px-3">
-                      Length :
-                    </div>
-                    <div class="flex w-3/4 items-center justify-start px-2">
-                      {{ sheetStore.getCutSheet(currentJob.jobID.toString()).parentLength }} mm
-                    </div>
-                  </div>
-                  <div class="flex">
-                    <div class="flex font-bold w-2/3 items-center justify-center px-3">
-                      Width :
-                    </div>
-                    <div class="flex w-3/4 items-center justify-start px-2">
-                      {{ sheetStore.getCutSheet(currentJob.jobID.toString()).parentWidth }} mm
+                    <div class="flex font-bold text-xl items-center justify-center px-3 bg-blue-100 py-2 rounded-2xl">
+                      Sheet Size :
+                      {{ sheetStore.getCutSheet(currentJob.jobID.toString()).parentLength }} mm x {{ sheetStore.getCutSheet(currentJob.jobID.toString()).parentWidth }} mm
                     </div>
                   </div>
 
@@ -964,22 +978,9 @@ const deleteJob = (job: Job) => {
                   Cut Details
                 </div>
                 <div class="flex w-full gap-2 flex-col">
-                  <div class="flex">
-                    <div class="flex font-bold w-2/3 items-center justify-center px-3">
-                      Width :
+                    <div class="flex text-2xl font-bold px-3 bg-red-500 py-2 items-center justify-center text-white rounded-2xl">
+                      Cut Sheet : {{ currentJob.length }}mm x {{ currentJob.width }}mm
                     </div>
-                    <div class="flex w-3/4 items-center justify-start px-2">
-                      {{ currentJob.width }}mm
-                    </div>
-                  </div>
-                  <div class="flex">
-                    <div class="flex font-bold w-2/3 items-center justify-center px-3">
-                      Length :
-                    </div>
-                    <div class="flex w-3/4 items-center justify-start px-2">
-                      {{ currentJob.length }}mm
-                    </div>
-                  </div>
                   <div class="flex">
                     <div class="flex font-bold w-2/3 items-center justify-center px-3">
                       Remarks :

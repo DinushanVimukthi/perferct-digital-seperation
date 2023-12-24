@@ -38,6 +38,7 @@ const addSheet = async (sheet: Sheet) => {
         await dbSet(dbChild(ref, sheetID), {
             sheetID: sheetID,
             thickness: sheet.thickness,
+            stockType: sheet.stockType,
             width: sheet.width,
             length: sheet.length,
             parentSheetID: sheet.sheetID,

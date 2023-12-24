@@ -234,6 +234,23 @@ const MarkAsDeliverable =()=>{
     notify("warning","Warning","Please Enter Valid PIN")
     return;
   }
+  // check if the floor values are valid
+  if(floorDetails.value.floorX1 <= 0){
+    notify("warning","Warning","Please Enter Valid Floor X1")
+    return;
+  }
+  if(floorDetails.value.floorY1 <= 0){
+    notify("warning","Warning","Please Enter Valid Floor Y1")
+    return;
+  }
+  if(floorDetails.value.floorX2 <= 0){
+    notify("warning","Warning","Please Enter Valid Floor X2")
+    return;
+  }
+  if(floorDetails.value.floorY2 <= 0){
+    notify("warning","Warning","Please Enter Valid Floor Y2")
+    return;
+  }
 
   const floorArea = {
     floorX1: floorDetails.value.floorX1,
@@ -262,6 +279,12 @@ const elapsedTime = (startTime:string,endTime:string)=>{
     return moment.utc(moment().diff(moment(startTime,"HH:mm:ss"))).format("HH:mm:ss")
   }
   return moment.utc(moment(endTime,"HH:mm:ss").diff(moment(startTime,"HH:mm:ss"))).format("HH:mm:ss")
+}
+
+const elapsedTimeByDate = (startTime:Date,endTime:Date)=>{
+  const diff = moment.utc(moment(endTime).diff(moment(startTime))).format("HH:mm:ss")
+  return diff
+
 }
 
 const timeDifference = (startTime:string,endTime:string)=>{
@@ -592,13 +615,15 @@ const timeDifference = (startTime:string,endTime:string)=>{
         <tr v-for="job in useJobStore().getFinishedJobs" :key="job.jobID" v-if="useJobStore().getFinishedJobs.length > 0">
           <td>{{job.jobID}}</td>
           <td>{{job.sheetID}}</td>
-          <td>{{formatTime(job.createdTime)}}</td>
-          <td>{{formatTime(job.tasks.PlateFinishing.finishedTime)}}</td>
+          <td>{{new Date(job.createdTime).toLocaleString()}}</td>
+          <td>{{new Date(job.tasks.PlateDrying.finishedTime).toLocaleString()}}</td>
           <td>
-            {{moment.utc(moment(job.tasks.PlateFinishing.finishedTime,"HH:mm:ss").diff(moment(job.createdTime,"HH:mm:ss"))).format("HH:mm")}}
+            {{elapsedTimeByDate(job.createdTime,new Date(job.tasks.PlateDrying.finishedTime))}}
           </td>
           <td class="flex items-center justify-center gap-2">
-            <n-button class="bg-blue-50 hover:bg-blue-500 flex items-center justify-center gap-3 border border-blue-700 font-bold py-2 px-2 rounded-2xl hover:text-white" @click="markAsCollectable(job)">
+            <n-button
+                class="bg-blue-50 hover:bg-blue-500 flex items-center justify-center gap-3 border border-blue-700 font-bold py-2 px-2 rounded-2xl hover:text-white"
+                @click="markAsCollectable(job)">
               <n-icon :component="Collections20Regular" size="medium" />
               Mark as Collectable
             </n-button>

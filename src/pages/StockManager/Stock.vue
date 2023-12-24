@@ -19,6 +19,7 @@ const sheetsSummarized = computed(() => {
       summarizedSheets.push({
         sheetID: sheet.sheetID.split('_')[0],
         thickness: sheet.thickness,
+        type: sheet.stockType,
         width: sheet.width,
         length: sheet.length,
         count: 1,
@@ -47,10 +48,11 @@ watch(sheetStore.sheets, (newVal) => {
 
 const form = ref<Sheet>({
   sheetID: "",
-  thickness: 40,
-  width: 200,
-  length: 400,
-  count : 5,
+  thickness: null,
+  stockType: null,
+  width: null,
+  length: null,
+  count : null,
   parentSheetID: null
 });
 
@@ -94,10 +96,11 @@ const addSheet = async (e:MouseEvent) => {
       sheets.value = sheetStore.sheets
       form.value = {
         sheetID: "",
-        thickness: 0,
-        width: 0,
-        length: 0,
-        count: 1
+        stockType: null,
+        thickness: null,
+        width: null,
+        length: null,
+        count: null
       }
       form.value.sheetID = sheetStore.getLastSheetID
     } else {
@@ -216,6 +219,10 @@ const message = useMessage()
           <n-form-item label="Sheet ID" label-width="120px" label-align="center" path="sheetID" >
             <n-input v-model:value="form.sheetID" readonly class="w-full font-bold" />
           </n-form-item>
+          <n-form-item label="Sheet Type" label-width="120px" label-align="center" path="sheet Type" >
+            <n-input v-model:value="form.stockType"  class="w-full" maxlength="5" @input="()=>form.stockType = form.stockType.toLocaleUpperCase()"/>
+          </n-form-item>
+
           <n-form-item label="Thickness" label-width="120px" label-align="center" path="thickness">
             <n-input-number v-model:value="form.thickness" class="w-full" />
           </n-form-item>
@@ -257,6 +264,9 @@ const message = useMessage()
             class="w-full p-6">
           <n-form-item label="Sheet ID" label-width="120px" label-align="center" path="sheetID" >
             <n-input v-model:value="selectedSheet.sheetID" readonly class="w-full font-bold" />
+          </n-form-item>
+          <n-form-item label="Type" label-width="120px" label-align="center" path="type">
+            <n-input readonly v-model:value="selectedSheet.type" class="w-full" />
           </n-form-item>
           <n-form-item label="Thickness" label-width="120px" label-align="center" path="thickness">
             <n-input-number readonly v-model:value="selectedSheet.thickness" class="w-full" />
@@ -311,6 +321,7 @@ const message = useMessage()
             <thead class="sticky top-0">
             <tr class="text-center">
               <th>Sheet ID</th>
+              <th>Sheet Type</th>
               <th>Sheet Thickness</th>
               <th>Sheet Width</th>
               <th>Sheet Length</th>
@@ -321,6 +332,7 @@ const message = useMessage()
             <tbody>
             <tr class="text-center" v-for="sheet in sheetsSummarized" :key="sheet.id">
               <td>{{sheet.sheetID}}</td>
+              <td>{{sheet.type}}</td>
               <td>{{sheet.thickness}} mm</td>
               <td>{{sheet.width}} mm</td>
               <td>{{sheet.length}} mm</td>

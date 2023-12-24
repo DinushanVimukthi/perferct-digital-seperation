@@ -285,7 +285,7 @@ const Jobs = computed(()=>{
         :bordered="false"
         class="rounded-2xl"
         :body-style="{ padding: '0px' }"
-        :style="{ width: '60%' }"
+        :style="{ width: '100%' }"
     >
       <template #header>
         <div class="flex items-center justify-center w-full gap-2">
@@ -302,7 +302,7 @@ const Jobs = computed(()=>{
       </template>
 
       <div class="flex w-full gap-4">
-        <div class="flex w-2/3 gap-2 flex-col">
+        <div class="flex w-3/5 gap-2 flex-col">
           <div class="flex w-full gap-2 border-2 rounded-2xl p-4">
             <div class="flex w-1/2 flex-col gap-2 ">
               <div class="text-xl font-bold text-center mb-3">
@@ -383,21 +383,20 @@ const Jobs = computed(()=>{
                 </div>
                 <div class="flex">
                   <div class="flex font-bold w-2/3 items-center justify-center px-3">
-                    Dimension :
+                    Type :
                   </div>
                   <div class="flex w-3/4 items-center justify-start px-2">
-                    {{selectedJob.parentSheetLength}}mm x {{selectedJob.parentSheetWidth}}mm
+                    {{sheetStore.getSheet(selectedJob.sheetID).stockType}}
                   </div>
                 </div>
-                <div class="flex text-xl py-2 rounded bg-amber-300">
-                  <div class="flex flex-col font-bold w-2/3 items-center justify-center px-3">
-                    <div>Cut Length :</div>
-                    <div>
-                      (length x width)
-                    </div>
+                <div class="flex py-2 rounded bg-blue-500 text-white">
+                  <div class="flex font-bold text-lg w-full items-center justify-start px-2">
+                    Sheet Size : {{selectedJob.parentSheetLength}}mm x {{selectedJob.parentSheetWidth}}mm
                   </div>
-                  <div class="flex font-bold text-xl w-3/4 items-center justify-start px-2">
-                    {{selectedJob.length}}mm x {{selectedJob.width}}mm
+                </div>
+                <div class="flex text-xl py-2 rounded bg-red-500 text-white">
+                  <div class="flex font-bold text-xl w-full items-center justify-start px-2">
+                    Cut Size :{{selectedJob.length}}mm x {{selectedJob.width}}mm
                   </div>
                 </div>
 
@@ -440,8 +439,8 @@ const Jobs = computed(()=>{
 
           </div>
         </div>
-        <div class="flex w-1/3 p-6">
-          <canvas ref="canvasRef" class=" w-full" height="350">
+        <div class="flex w-2/5 p-6">
+          <canvas ref="canvasRef" class=" w-full" width="400" height="600">
 
           </canvas>
         </div>

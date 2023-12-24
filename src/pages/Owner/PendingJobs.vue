@@ -223,7 +223,7 @@ const getTask = (tasks) => {
         :bordered="false"
         class="rounded-2xl"
         :body-style="{ padding: '0px' }"
-        :style="{ width: '80%' }"
+        :style="{ width: '100%' }"
     >
       <template #header>
         <div class="flex items-center justify-center w-full gap-2">
@@ -305,19 +305,9 @@ const getTask = (tasks) => {
                   </div>
                 </div>
                 <div class="flex">
-                  <div class="flex font-bold w-2/3 items-center justify-center px-3">
-                    Length :
-                  </div>
-                  <div class="flex w-3/4 items-center justify-start px-2">
-                    {{ sheetStore.getCutSheet(selectedJob.jobID.toString()).parentLength }} mm
-                  </div>
-                </div>
-                <div class="flex">
-                  <div class="flex font-bold w-2/3 items-center justify-center px-3">
-                    Width :
-                  </div>
-                  <div class="flex w-3/4 items-center justify-start px-2">
-                    {{ sheetStore.getCutSheet(selectedJob.jobID.toString()).parentWidth }} mm
+                  <div class="flex font-bold text-lg items-center justify-center px-3 bg-blue-100 py-2 rounded-2xl">
+                    Size :
+                    {{ sheetStore.getCutSheet(selectedJob.jobID.toString()).parentLength }} mm x {{ sheetStore.getCutSheet(selectedJob.jobID.toString()).parentWidth }} mm
                   </div>
                 </div>
 
@@ -331,21 +321,8 @@ const getTask = (tasks) => {
                 Cut Details
               </div>
               <div class="flex w-full gap-2 flex-col">
-                <div class="flex">
-                  <div class="flex font-bold w-2/3 items-center justify-center px-3">
-                    Width :
-                  </div>
-                  <div class="flex w-3/4 items-center justify-start px-2">
-                    {{ selectedJob.width }}mm
-                  </div>
-                </div>
-                <div class="flex">
-                  <div class="flex font-bold w-2/3 items-center justify-center px-3">
-                    Length :
-                  </div>
-                  <div class="flex w-3/4 items-center justify-start px-2">
-                    {{ selectedJob.length }}mm
-                  </div>
+                <div class="flex text-xl font-bold px-3 bg-red-500 py-2 items-center justify-center text-white rounded-2xl">
+                  Size : {{ selectedJob.width }}mm x {{ selectedJob.length }}mm
                 </div>
                 <div class="flex">
                   <div class="flex font-bold w-2/3 items-center justify-center px-3">
@@ -437,7 +414,7 @@ const getTask = (tasks) => {
         :bordered="false"
         class="rounded-2xl"
         :body-style="{ padding: '0px' }"
-        :style="{ width: '60%' }"
+        :style="{ width: '80%' }"
     >
       <template #header>
         <div class="flex items-center justify-center w-full gap-2">
@@ -540,10 +517,10 @@ const getTask = (tasks) => {
           </td>
           <td>{{job.createdTime}}</td>
           <td class="flex items-center justify-center gap-2">
-            <button class="bg-green-200 hover:bg-white hover:text-black border hover:border hover:border-green-500 flex items-center justify-center gap-3 text-green-800 font-bold py-2 px-2 rounded" @click="ViewJob(job)">
+            <n-button class="bg-green-200 hover:bg-white hover:text-black border hover:border hover:border-green-500 flex items-center justify-center gap-3 text-green-800 font-bold py-2 px-2 rounded" @click="ViewJob(job)">
 <!--              <n-icon :component="Checkmark" size="large" />-->
               View Job
-            </button>
+            </n-button>
           </td>
         </tr>
         <tr v-else>

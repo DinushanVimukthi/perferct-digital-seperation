@@ -58,41 +58,52 @@ const TagIcon = (task:string) => {
 };
 
 const FormatDate = (date:string) =>{
-  return moment(date).format('DD MMM hh:mm A');
+  return moment(date).format('DD MMM Y hh:mm A');
 }
 
 const formatTime = (time:string) => {
   return moment(time, "HH:mm:ss").format("MMMM Do YYYY, h:mm:ss a")
 };
 const viewJobModel = ref(false);
-const drawRectaangle = (ctx, x, y, width, height,labelWidth,labelHeight, color,child=false) => {
+const drawRectangle = (ctx: CanvasRenderingContext2D, x: number, y: number, width: number, height: number, labelWidth: number, labelHeight: number, color: string,fillColor="white",name="", child = false) => {
   ctx.strokeStyle = color;
   ctx.lineWidth = 2;
-
-  // Draw the rectangle
+  // Draw the rectangle and fill it with the fill color
+  ctx.fillStyle = fillColor;
+  // ctx.strokeRect(x, y, width, height);
+  ctx.fillRect(x, y, width, height)
+  // add border
   ctx.strokeRect(x, y, width, height);
 
   // Calculate the position for the width and height labels
   const widthLabelX = x + width / 2
   let widthLabelY = y + height - 5;
-  if(child){
-    widthLabelY = y -5;
+  if (child) {
+    widthLabelY = y - 5;
   }
-  const heightLabelX = x + width -20;
+  const heightLabelX = x + width - 20;
   const heightLabelY = y + height / 2;
 
   // Draw labels for width and height
   ctx.fillStyle = color;
+
+
+
   ctx.font = 'bold 10px Arial';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  ctx.fillText(`${parseFloat(labelWidth).toFixed(0)} mm`, widthLabelX, widthLabelY);
-  ctx.fillText(`${parseFloat(labelHeight).toFixed(0)} mm`, heightLabelX, heightLabelY);
+  ctx.fillText(`${parseFloat(labelWidth.toString()).toFixed(0)} mm`, widthLabelX, widthLabelY);
+  ctx.fillText(`${parseFloat(labelHeight.toString()).toFixed(0)} mm`, heightLabelX, heightLabelY);
+  // add name to center
+  if(name!=""){
+    ctx.fillText(`${name}`, widthLabelX, heightLabelY + 50);
+  }
+  // fill color
 };
+
 
 const canvasRef = ref<HTMLCanvasElement>();
 const draw = (cutSheet: CutSheet,sheet:BalanceSheet[]) => {
-  console.log(sheet);
   const canvas: HTMLCanvasElement = canvasRef.value as HTMLCanvasElement;
   const ctx = canvas.getContext('2d');
   if (!ctx) {
@@ -260,7 +271,7 @@ const sortTask = (tasks:Record<string,Task>)=>{
   <OwnerLayout>
     <n-modal
         v-model:show="viewJobModel"
-        :on-after-enter="()=>{draw(sheetStore.getCutSheet(currentJob.jobID))}"
+        :on-after-enter="()=>{draw(sheetStore.getCutSheet(currentJob.jobID),currentJob.balanceSheets)}"
         title="View Job"
         :width="1000"
         :mask-closable="false"
@@ -270,7 +281,7 @@ const sortTask = (tasks:Record<string,Task>)=>{
           :bordered="false"
           class="rounded-2xl"
           :body-style="{ padding: '0px' }"
-          :style="{ width: '80%' }"
+          :style="{ width: '100%' }"
       >
         <template #header>
           <div class="flex items-center justify-center w-full gap-2">
@@ -352,19 +363,9 @@ const sortTask = (tasks:Record<string,Task>)=>{
                     </div>
                   </div>
                   <div class="flex">
-                    <div class="flex font-bold w-2/3 items-center justify-center px-3">
-                      Length :
-                    </div>
-                    <div class="flex w-3/4 items-center justify-start px-2">
-                      {{sheetStore.getCutSheet(currentJob.jobID).parentLength }} mm
-                    </div>
-                  </div>
-                  <div class="flex">
-                    <div class="flex font-bold w-2/3 items-center justify-center px-3">
-                      Width :
-                    </div>
-                    <div class="flex w-3/4 items-center justify-start px-2">
-                      {{sheetStore.getCutSheet(currentJob.jobID).parentWidth }} mm
+                    <div class="flex font-bold text-xl items-center justify-center px-3 bg-blue-100 py-2 rounded-2xl">
+                      Sheet Size :
+                      {{ sheetStore.getCutSheet(currentJob.jobID.toString()).parentLength }} mm x {{ sheetStore.getCutSheet(currentJob.jobID.toString()).parentWidth }} mm
                     </div>
                   </div>
 
@@ -379,21 +380,8 @@ const sortTask = (tasks:Record<string,Task>)=>{
                   Cut Details
                 </div>
                 <div class="flex w-full gap-2 flex-col">
-                  <div class="flex">
-                    <div class="flex font-bold w-2/3 items-center justify-center px-3">
-                      Width :
-                    </div>
-                    <div class="flex w-3/4 items-center justify-start px-2">
-                      {{currentJob.width}}mm
-                    </div>
-                  </div>
-                  <div class="flex">
-                    <div class="flex font-bold w-2/3 items-center justify-center px-3">
-                      Length :
-                    </div>
-                    <div class="flex w-3/4 items-center justify-start px-2">
-                      {{currentJob.length}}mm
-                    </div>
+                  <div class="flex text-xl font-bold px-3 bg-red-500 py-2 items-center justify-center text-white rounded-2xl">
+                    Cut Sheet : {{ currentJob.width }}mm x {{ currentJob.length }}mm
                   </div>
                   <div class="flex">
                     <div class="flex font-bold w-2/3 items-center justify-center px-3">
@@ -496,7 +484,7 @@ const sortTask = (tasks:Record<string,Task>)=>{
             </div>
           </div>
           <div class="flex w-1/3 p-6">
-            <canvas id="canvasElement" ref="canvasRef" width="400" height="400" class="border-2 rounded-2xl">
+            <canvas id="canvasElement" ref="canvasRef" width="400" height="600" class="border-2 rounded-2xl">
             </canvas>
           </div>
 
@@ -602,22 +590,20 @@ const sortTask = (tasks:Record<string,Task>)=>{
         <thead>
         <tr class="text-center">
           <th>Job ID</th>
+          <th>Job Name</th>
           <th>Sheet ID</th>
           <th>Started Time</th>
           <th>FinishedTime</th>
-          <th>Time Elapsed</th>
           <th>Action</th>
         </tr>
         </thead>
         <tbody class="text-center">
         <tr v-for="job in useJobStore().getCollectableJobs" :key="job.jobID" v-if="useJobStore().getCollectableJobs.length > 0">
           <td>{{job.jobID}}</td>
+          <td>{{job.jobName}}</td>
           <td>{{job.sheetID}}</td>
-          <td>{{formatTime(job.createdTime)}}</td>
-          <td>{{formatTime(job.tasks.PlateFinishing.finishedTime)}}</td>
-          <td>
-            {{elapsedTime(FormatDate(job.tasks.PlateFinishing.finishedTime).toString(),FormatDate(job.createdTime).toString())}}
-          </td>
+          <td>{{FormatDate(job.createdTime)}}</td>
+          <td>{{FormatDate(job.tasks.PlateDrying.finishedTime)}}</td>
           <td class="flex items-center justify-center  gap-2">
             <n-button
               @click="viewSelectedJob(job)"

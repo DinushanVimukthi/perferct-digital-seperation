@@ -669,10 +669,10 @@ const monthToSort = ref(Date.now());
             <td>{{ job.jobID }}</td>
             <td>{{ job.jobName }}</td>
             <td>{{ FormatDate(job.createdTime) }}</td>
-            <td>{{ FormatDate(job.tasks.PlateFinishing.finishedTime) }}</td>
+            <td>{{ FormatDate(job.tasks.PlateDrying.finishedTime) }}</td>
             <td>
               {{
-                timeDifference(job.createdTime, job.tasks.PlateFinishing.finishedTime)
+                timeDifference(job.createdTime, job.tasks.PlateDrying.finishedTime)
               }}
             </td>
             <td>{{ sheetStore.getSheet(job.sheetID).sheetID }}</td>

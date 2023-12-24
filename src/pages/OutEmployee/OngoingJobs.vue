@@ -85,10 +85,10 @@ const getTaskName = (task) => {
 };
 
 const getNextTask= (currentTask:string)=>{
-  const taskOrder = ["PlateWriting", "PlateExposure", "PlateWashing", "PlateDrying", "PlateFinishing"];
+  const taskOrder = ["PlateWriting", "PlateExposure", "PlateWashing", "PlateDrying"];
   const currentTaskIndex = taskOrder.indexOf(currentTask);
   if (currentTaskIndex == taskOrder.length - 1) {
-    return "Completing"
+    return "PlateFinishing"
   } else {
     return taskOrder[currentTaskIndex + 1]
   }
@@ -156,11 +156,11 @@ const NextTask = ()=>{
     finishedTime: "",
     remarks: confirmation.value.remarks,
     startedBy: confirmation.value.employeeID,
-    startedTime: new Date().toUTCString(),
+    startedTime: new Date().toString(),
     taskID: "Task_" + Math.random().toString(36).substr(2, 9),
     taskType: nextTask,
   }
-  if (confirmation.value.currentTask.taskType === "PlateFinishing"){
+  if (confirmation.value.currentTask.taskType === "PlateDrying"){
     useJobStore().finishJob(selectedJobID.value)
     userConfirmationModal.value = false
     return;
@@ -334,7 +334,7 @@ const sortTask = (tasks)=>{
           :bordered="false"
           class="rounded-2xl"
           :body-style="{ padding: '0px' }"
-          :style="{ width: '80%' }"
+          :style="{ width: '100%' }"
       >
         <template #header>
           <div class="flex items-center justify-center w-full gap-2">
@@ -431,13 +431,8 @@ const sortTask = (tasks)=>{
                       {{sheetStore.getSheet(selectedJob.sheetID.toString()).width}}mm x {{sheetStore.getSheet(selectedJob.sheetID.toString()).length}}mm
                     </div>
                   </div>
-                  <div class="flex text-xl py-2 rounded bg-amber-300">
-                    <div class="flex flex-col font-bold w-2/3 items-center justify-center px-3">
-                      <div>Cut Length :</div>
-                      <div>
-                        (length x width)
-                      </div>
-                    </div>
+                  <div class="flex text-xl px-2 py-2 rounded bg-amber-300">
+                    Cut Size :
                     <div class="flex font-bold text-xl w-3/4 items-center justify-start px-2">
                       {{selectedJob.length}}mm x {{selectedJob.width}}mm
                     </div>

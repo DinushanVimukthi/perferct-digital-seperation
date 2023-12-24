@@ -32,35 +32,41 @@ const login =async () => {
   }
   const loaderStore = useLoaderStore();
   loaderStore.setLoading(true);
-  const result = await userStore.logUser(loginForm.value.email,loginForm.value.password);
-  if (result.success){
-    const userRole = result.userRole
-    console.log(userRole)
+  try {
+    const result = await userStore.logUser(loginForm.value.email,loginForm.value.password);
+    if (result.success){
 
-    let path = ''
-    if (userRole === 'InEmployee'){
-      path +='/inEmp/dashboard'
-    }else if (userRole === 'OutEmployee'){
-      path +='/outEmp/pending'
-    }else if (userRole === 'StockManager') {
-      path +='/stockManager/dashboard'
-    }else if (userRole === 'Admin') {
-      path +='/owner/dashboard'
+      const userRole = result.userRole
+
+      let path = ''
+      if (userRole === 'InEmployee'){
+        path +='/inEmp/dashboard'
+      }else if (userRole === 'OutEmployee'){
+        path +='/outEmp/pending'
+      }else if (userRole === 'StockManager') {
+        path +='/stockManager/dashboard'
+      }else if (userRole === 'Admin') {
+        path +='/owner/dashboard'
+      }
+      router.push(path)
+      notify('success','Success','Logged in successfully');
+    }else{
+      console.log(result)
+      const error = result.error
+      if (error.code === 'auth/user-not-found'){
+        notify('error','Error','User not found');
+      }else if (error.code === 'auth/wrong-password'){
+        notify('error','Error','Incorrect password');
+      } else{
+        notify('error','Error','Something went wrong');
+      }
+      loaderStore.setLoading(false);
     }
-    router.push(path)
-    notify('success','Success','Logged in successfully');
-  }else{
-    console.log(result)
-    const error = result.error
-    if (error.code === 'auth/user-not-found'){
-      notify('error','Error','User not found');
-    }else if (error.code === 'auth/wrong-password'){
-      notify('error','Error','Incorrect password');
-    } else{
-      notify('error','Error','Something went wrong');
-    }
+  }catch (e){
+    notify('error','Error',e.toString());
     loaderStore.setLoading(false);
-}
+  }
+
 }
 const year = new Date().getFullYear();
 </script>

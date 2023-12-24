@@ -34,6 +34,7 @@ interface Design{
 interface Sheet {
     sheetID: string;
     thickness: number;
+    stockType: string;
     width: number;
     filled: boolean;
     length: number;

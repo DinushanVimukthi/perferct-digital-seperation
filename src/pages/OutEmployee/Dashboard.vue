@@ -7,7 +7,7 @@ import OutEmployeeLayout from "@/Layout/OutEmployeeLayout.vue";
 <template>
   <OutEmployeeLayout>
     <h1>
-      Dashboard
+      Dashboard update
     </h1>
   </OutEmployeeLayout>
 </template>

@@ -34,18 +34,31 @@ const thickness = Object.keys(balanceSheetsByThickness).sort((a,b)=>Number(a)-Nu
 })
 
 const groupSheetWithSameHeightAndLength = (sheets:BalanceSheet[])=>{
-  const result = sheets.reduce((acc,cur)=>{
-    const key = `${cur.length}-${cur.width}`;
-    if(acc[key]){
-      acc[key].push(cur);
+
+  //categorize by stockType
+  let r = [];
+  sheets.map((sheet)=>{
+    if(r[sheet.stockType]){
+      r[sheet.stockType].push(sheet);
     }else{
-      acc[key] = [cur];
+      r[sheet.stockType] = [sheet];
     }
-    return acc;
-  },{});
-  return Object.keys(result).map((key)=>{
-    return result[key];
   })
+  for (const key in r) {
+    if (Object.prototype.hasOwnProperty.call(r, key)) {
+      const element = r[key];
+      r[key] = element.reduce((acc,cur)=>{
+        const key = `${cur.length}-${cur.width}`;
+        if(acc[key]){
+          acc[key].push(cur);
+        }else{
+          acc[key] = [cur];
+        }
+        return acc;
+      },{});
+    }
+  }
+  return Object.values(r);
 }
 
 const fullBalanceSheetCount = (sheets:BalanceSheet[])=>{
@@ -99,19 +112,18 @@ const fullBalanceSheetCount = (sheets:BalanceSheet[])=>{
             Thickness : {{sheet[0].thickness}}mm</h1>
         </div>
         <div class="flex gap-0.5 bg-white flex-row flex-wrap">
-          <div v-for="item in groupSheetWithSameHeightAndLength(sheet)"
-               class="flex flex-col w-1/4 m-2 p-5 border cursor-pointer border-solid border-black hover:bg-gray-200"
-                @click="openModal(item)"
-          >
-            <h3>
-              {{item[0].length}}mm x {{item[0].width}}mm
-            </h3>
-              <h2>
-                Full Sheet : {{fullBalanceSheetCount(item)}}
-              </h2>
-              <h2>
-                Balance Sheet : {{item.length - fullBalanceSheetCount(item)}}
-              </h2>
+          <div class=" flex " v-for="(item,key) in groupSheetWithSameHeightAndLength(sheet)">
+            <div v-for="x in item" class="flex border-2 m-1 p-4 flex-col bg-yellow-50" @click="openModal(x)">
+              <h3>
+                {{x[0].stockType}} : {{x[0].length}}mm x {{x[0].width}}mm
+              </h3>
+              <h4>
+                Full Sheet : {{fullBalanceSheetCount(x)}}
+              </h4>
+              <h4>
+                Balance Sheet : {{x.length - fullBalanceSheetCount(x)}}
+              </h4>
+            </div>
           </div>
 
         </div>

@@ -13,7 +13,7 @@ const sheetsSummarized = computed(() => {
   const values = Object.values(sheetStore.sheets);
   values.forEach((sheet:Sheet) => {
     const index = summarizedSheets.findIndex((summarizedSheet:Sheet) => {
-      return summarizedSheet.thickness === sheet.thickness && summarizedSheet.width === sheet.width && summarizedSheet.length === sheet.length
+      return summarizedSheet.thickness === sheet.thickness && summarizedSheet.width === sheet.width && summarizedSheet.length === sheet.length && summarizedSheet.type === sheet.stockType
     })
     if (index === -1){
       summarizedSheets.push({
@@ -29,6 +29,7 @@ const sheetsSummarized = computed(() => {
       summarizedSheets[index].count += 1
     }
   })
+  console.log(summarizedSheets)
   return summarizedSheets
 })
 

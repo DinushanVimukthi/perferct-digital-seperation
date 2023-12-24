@@ -95,7 +95,7 @@ const fullBalanceSheetCount = (sheets:BalanceSheet[])=>{
       </template>
       <div class="flex flex-col flex-wrap items-center justify-center gap-2 p-2">
         <div class="" v-for="sheet in selectedSheetsInCategory">
-          <n-text class="text-2xl font-bold">
+          <n-text class="text-lg">
             {{sheet.bSheetID === "" ? sheet.sheetID : sheet.bSheetID}}
           </n-text>
         </div>

@@ -103,6 +103,14 @@ const drawRectangle = (ctx: CanvasRenderingContext2D, x: number, y: number, widt
   // fill color
 };
 
+const sortTask = (tasks:Record<string,Task>)=>{
+  const taskOrder = ["PlateWriting", "PlateExposure", "PlateWashing", "PlateDrying", "PlateFinishing"];
+  const sortedTasks:Task[] = [];
+  Object.keys(tasks).forEach((taskType)=>{
+    sortedTasks[taskOrder.indexOf(taskType)] = tasks[taskType];
+  })
+  return sortedTasks;
+}
 const draw = (cutSheet: CutSheet,sheet:BalanceSheet[]) => {
   console.log(sheet);
   const canvas: HTMLCanvasElement = canvasRef.value as HTMLCanvasElement;
@@ -499,8 +507,8 @@ const monthToSort = ref(Date.now());
                   </tr>
                   </thead>
                   <tbody class="text-center">
-                  <tr v-for="(task,index) in currentJob.tasks" :key="task.taskID" v-if="currentJob.tasks">
-                    <td>#{{ Object.keys(currentJob.tasks).indexOf(task.taskType) + 1 }}</td>
+                  <tr v-for="(task,index) in sortTask(currentJob.tasks)" :key="task.taskID" v-if="currentJob.tasks">
+                    <td>#{{ index + 1 }}</td>
                     <td>{{ task.taskType }}</td>
                     <td>
                       <n-tag :type="task.finishedTime.toString().trim()===''? 'info' :'success'">

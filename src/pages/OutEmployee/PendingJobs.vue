@@ -249,13 +249,13 @@ const sortJobs = (jobs:Job[]) => {
 const PriorityColor = (priority:string) => {
   switch (priority) {
     case "Normal":
-      return "success"
+      return { color: '#716d00', textColor: '#ffffff', borderColor: '#555' }
     case "Urgent":
-      return "error"
+      return { color: '#b00000', textColor: '#ffffff', borderColor: '#555' }
     case "High":
-      return "warning"
+      return { color: '#008674', textColor: '#ffffff', borderColor: '#555' }
     default:
-      return "info"
+      return { color: '#0500a2', textColor: '#ffffff', borderColor: '#555' }
   }
 };
 
@@ -285,7 +285,7 @@ const Jobs = computed(()=>{
         :bordered="false"
         class="rounded-2xl"
         :body-style="{ padding: '0px' }"
-        :style="{ width: '100%' }"
+        :style="{ width: '90%',height: '95vh' }"
     >
       <template #header>
         <div class="flex items-center justify-center w-full gap-2">
@@ -302,7 +302,7 @@ const Jobs = computed(()=>{
       </template>
 
       <div class="flex w-full gap-4">
-        <div class="flex w-3/5 gap-2 flex-col">
+        <div class="flex w-2/3 gap-2 flex-col">
           <div class="flex w-full gap-2 border-2 rounded-2xl p-4">
             <div class="flex w-1/2 flex-col gap-2 ">
               <div class="text-xl font-bold text-center mb-3">
@@ -314,7 +314,7 @@ const Jobs = computed(()=>{
                     Priority
                   </div>
                   <div class="flex w-3/4 items-center justify-start px-2">
-                    <n-tag :bordered="false" :type="PriorityColor(selectedJob.priority ?? 'Normal')">
+                    <n-tag :bordered="false" :color="PriorityColor(selectedJob.priority ?? 'Normal')">
                       {{selectedJob.priority ?? "Normal"}}
                     </n-tag>
                   </div>
@@ -373,20 +373,14 @@ const Jobs = computed(()=>{
 
                   </div>
                 </div>
-                <div class="flex">
-                  <div class="flex font-bold w-2/3 items-center justify-center px-3">
-                    Thickness :
-                  </div>
-                  <div class="flex w-3/4 items-center justify-start px-2">
-                    {{sheetStore.getSheet(selectedJob.sheetID).thickness}} mm
+                <div class="flex text-xl py-2 rounded bg-amber-500 text-white">
+                  <div class="flex font-bold text-xl w-full items-center justify-start px-2">
+                    Thickness : {{sheetStore.getSheet(selectedJob.sheetID).thickness}} mm
                   </div>
                 </div>
-                <div class="flex">
-                  <div class="flex font-bold w-2/3 items-center justify-center px-3">
-                    Type :
-                  </div>
-                  <div class="flex w-3/4 items-center justify-start px-2">
-                    {{sheetStore.getSheet(selectedJob.sheetID).stockType}}
+                <div class="flex text-xl py-2 rounded bg-green-500 text-white">
+                  <div class="flex font-bold text-xl w-full items-center justify-start px-2">
+                    Type : {{sheetStore.getSheet(selectedJob.sheetID).stockType}}
                   </div>
                 </div>
                 <div class="flex py-2 rounded bg-blue-500 text-white">
@@ -412,36 +406,22 @@ const Jobs = computed(()=>{
                 <div class="flex w-full gap-3 items-center justify-center">
 <!--  Balaance Sheets -->
                   <div class="flex flex-col items-center px-6 justify-around gap-2 rounded-lg p-2">
-                      <div class="text-md font-bold py-2 px-3 rounded-2xl bg-blue-300" v-for="sheet in selectedJob.balanceSheets" :key="sheet.sheetID">
-                        {{sheet.length}}mm x {{sheet.width}}mm
+                      <div class="text-lg font-bold text-white py-2 px-3 rounded-2xl bg-blue-500" v-for="sheet in selectedJob.balanceSheets" :key="sheet.sheetID">
+                        {{sheet.length}} mm x {{sheet.width}} mm
                       </div>
                   </div>
                 </div>
               </div>
             </div>
-            <div class="flex w-1/2 flex-col">
-              <div class="text-xl font-bold text-center mb-3">
-                Deadline
-              </div>
-              <div class="flex w-full gap-2 flex-col">
-                <div class="flex w-full gap-3 items-center justify-center">
-                  <div class="flex items-center px-6 justify-around gap-6 rounded-lg p-2">
-                    <n-icon size="large" :component="Calendar" />
-                    <div class="flex flex-col gap-1">
-                      <div class="text-xs">
-                        {{selectedJob.deadLine}}
-                      </div>
-                    </div>
-                  </div>
-                </div>
+            <div class="flex items-center w-1/2 rounded-2xl bg-purple-500 text-white">
+              <div class="w-full flex justify-center items-center text-xl font-bold text-center ">
+                Deadline : {{FormatDate(selectedJob.deadline)}}
               </div>
             </div>
-
           </div>
         </div>
-        <div class="flex w-2/5 p-6">
-          <canvas ref="canvasRef" class=" w-full" width="400" height="600">
-
+        <div class="flex w-1/3 p-2">
+          <canvas ref="canvasRef" width="300" height="500">
           </canvas>
         </div>
 
@@ -566,7 +546,7 @@ const Jobs = computed(()=>{
           <td>{{job.createdTime}}</td>
           <td>
             <n-tag
-                :type="PriorityColor(job.priority)"
+                :color="PriorityColor(job.priority)"
             >
             <span class="text-sm font-bold">
                 {{job.priority ?? "N/A"}}

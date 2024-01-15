@@ -58,7 +58,6 @@ export const useUserStore = defineStore('userStore', {
         },
         async logUser(email:string,password:string) {
             const credential = await signInUser(email,password)
-            console.log(credential)
             if (credential.success){
                 const userID=credential.user?.uid
                 if (typeof userID === "string") {

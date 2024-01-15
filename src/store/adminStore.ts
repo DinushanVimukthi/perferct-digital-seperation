@@ -50,7 +50,6 @@ export const useAdminStore = defineStore('adminStore', {
                     userPIN: user.userPIN,
                 }
             }
-            console.log(userObject)
             await addUserToDB(userObject)
             // this.setUser({...userObject, userID})
         },
@@ -70,7 +69,6 @@ export const useAdminStore = defineStore('adminStore', {
         },
         async updateUserPIN(userID: string, userPIN: string) {
             const user = await getUserFromDB(userID)
-            console.log(user)
             user.userPIN = userPIN
             this.setUser(user)
             await editUser(user)

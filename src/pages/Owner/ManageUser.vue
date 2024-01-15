@@ -108,7 +108,6 @@ const resetPassword = (userEmail:string) =>{
 }
 
 const deactivateUser = () =>{
-  console.log("Deactivate User")
 }
 
 
@@ -130,11 +129,9 @@ const OpenAddUserModal = () =>{
 
 
 const changePIN = ()=>{
-  console.log(formPin.value)
 }
 
 const openChangePINModal = (user:IUser)=>{
-  console.log(user)
   changePinModal.value = true;
   formPin.value.userID = user.userID;
 }
@@ -198,7 +195,6 @@ const notificaationModal = ref(false);
 
 const changePin = ()=>{
   const fieldValue = formPin.value;
-  console.log(fieldValue)
   //validate
   if(!fieldValue.currentPin){
     notify("error","Error","Please Enter Current PIN");
@@ -220,7 +216,6 @@ const changePin = ()=>{
     notify("error","Error","PIN must be 4 characters long");
     return;
   }
-  console.log(decryptText(adminStore.getUserPIN(formPin.value.userID)))
   if(fieldValue.currentPin !== decryptText(adminStore.getUserPIN(formPin.value.userID))){
     notify("error","Error","Current PIN is incorrect");
     return;
@@ -238,7 +233,6 @@ const resetPIN = ()=>{
     negativeText: 'No',
     onPositiveClick: async () => {
       let userPin =Math.floor(1000 + Math.random() * 9000);
-      console.log(formPin)
       await adminStore.updateUserPIN(formPin.value.userID, encryptText(userPin.toString()));
       notify("success","Success","PIN Reset Successfully");
       changePinModal.value = false;
@@ -413,7 +407,7 @@ const resetPIN = ()=>{
       </n-result>
     </n-modal>
     <div class="flex items-start gap-6 bg-white p-8 justify-center w-full h-full">
-      <div class="w-10/12 flex-col gap-4 flex ">
+      <div class="w-full flex-col gap-4 flex ">
           <div class="flex items-center justify-between w-full">
             <div class="ml-8 font-bold text-xl">
               All Users
@@ -427,7 +421,7 @@ const resetPIN = ()=>{
               </n-button>
             </div>
           </div>
-          <n-scrollbar style="max-height: 120px">
+          <n-scrollbar style="max-height: 120px" class="w-full">
             <n-table
                 striped size="small"
                 border="outer"

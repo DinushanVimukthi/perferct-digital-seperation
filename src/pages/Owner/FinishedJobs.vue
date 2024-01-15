@@ -147,7 +147,6 @@ const draw = (cutSheet: CutSheet,sheet:BalanceSheet[]) => {
           c.height = tmp;
         }
       }
-      console.log(c)
 
 
       rightCorner = true;
@@ -200,7 +199,6 @@ const clearConfirmation = ()=>{
 
 const Employees =computed(()=>{
   const outEmployee = useAdminStore().getOutEmployees;
-  console.log(outEmployee)
   const employees = [];
   for (const employee of outEmployee) {
     employees.push({
@@ -251,7 +249,6 @@ const MarkAsDeliverable =()=>{
 }
 
 const elapsedTime = (startTime: string, endTime: string) => {
-  console.log(startTime, endTime)
   if (endTime.toString().trim() === "") {
     return moment.utc(moment().diff(moment(startTime, "HH:mm:ss"))).format("HH:mm:ss")
   }

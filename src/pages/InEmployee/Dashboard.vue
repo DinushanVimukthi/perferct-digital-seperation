@@ -480,7 +480,6 @@ const drawRectangle = (ctx: CanvasRenderingContext2D, x: number, y: number, widt
   let widthLabelY = y + height - 5;
   if (child) {
     widthLabelY = y - 5
-    console.log(width, height)
   }
   const heightLabelX = x + width - 20;
   const heightLabelY = y + height / 2;
@@ -526,7 +525,6 @@ const draw = (cutSheet: CutSheet,sheet:BalanceSheet[]) => {
   drawRectangle(ctx, 20, 10, (parent.width - 50) * widthRatio, (parent.height - 50) * heightRatio, parent.width, parent.height, 'black');
   drawRectangle(ctx, 20, 10, (child.width - 50) * widthRatio, (child.height - 50) * heightRatio, child.width, child.height, 'red','yellow',label, true);
   const s = sheet;
-  console.log(s)
   let rightCorner = false;
   for (let i = 0; i < s.length; i++) {
     const balanceSheet = s[i];
@@ -590,7 +588,6 @@ const draw_view = (cutSheet: CutSheet,sheet:BalanceSheet[]) => {
   drawRectangle(ctx, 20, 10, (parent.width - 50) * widthRatio, (parent.height - 50) * heightRatio, parent.width, parent.height, 'black');
   drawRectangle(ctx, 20, 10, (child.width - 50) * widthRatio, (child.height - 50) * heightRatio, child.width, child.height, 'red', 'yellow', label, true);
   const s = sheet;
-  console.log(s)
   let rightCorner = false;
   for (let i = 0; i < s.length; i++) {
     const balanceSheet = s[i];

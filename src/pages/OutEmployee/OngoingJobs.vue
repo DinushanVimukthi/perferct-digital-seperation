@@ -108,7 +108,6 @@ const formatDateTime = (time:string) => {
 
 const Employees =computed(()=>{
   const outEmployee = useAdminStore().getOutEmployees;
-  console.log(outEmployee)
   const employees = [];
   for (const employee of outEmployee) {
     employees.push({
@@ -140,15 +139,15 @@ const NextTask = ()=>{
     notify("warning","Warning","Please Select your user Name")
     return;
   }
-  if (confirmation.value.pin.length < 4){
-    notify("warning","Warning","Please Enter Valid PIN")
-    return;
-  }
-
-  if (!compareText(confirmation.value.pin,useAdminStore().getUser(confirmation.value.employeeID).userPIN)){
-    notify("warning","Warning","Please Enter Valid PIN")
-    return;
-  }
+  // if (confirmation.value.pin.length < 4){
+  //   notify("warning","Warning","Please Enter Valid PIN")
+  //   return;
+  // }
+  //
+  // if (!compareText(confirmation.value.pin,useAdminStore().getUser(confirmation.value.employeeID).userPIN)){
+  //   notify("warning","Warning","Please Enter Valid PIN")
+  //   return;
+  // }
   const nextTask = getNextTask(confirmation.value.currentTask.taskType)
   useJobStore().finishTask(selectedJobID.value,confirmation.value.currentTask.taskType,confirmation.value.employeeID)
   const task:Task ={
@@ -222,7 +221,6 @@ const drawRectangle = (ctx: CanvasRenderingContext2D, x: number, y: number, widt
 };
 
 const draw = (cutSheet: CutSheet,sheet:BalanceSheet[]) => {
-  console.log(sheet);
   const canvas: HTMLCanvasElement = canvasRef.value as HTMLCanvasElement;
   const ctx = canvas.getContext('2d');
   if (!ctx) {
@@ -266,7 +264,6 @@ const draw = (cutSheet: CutSheet,sheet:BalanceSheet[]) => {
           c.height = tmp;
         }
       }
-      console.log(c)
 
 
       rightCorner = true;
@@ -584,12 +581,12 @@ const sortTask = (tasks)=>{
               </div>
               <n-select v-model:value="confirmation.employeeID" :options="Employees" placeholder="Select Employee" />
             </div>
-            <div class="flex">
-              <div class="flex font-bold w-2/3 items-center justify-center px-3">
-                User PIN :
-              </div>
-              <n-input v-model:value="confirmation.pin" placeholder="Enter User PIN" />
-            </div>
+<!--            <div class="flex">-->
+<!--              <div class="flex font-bold w-2/3 items-center justify-center px-3">-->
+<!--                User PIN :-->
+<!--              </div>-->
+<!--              <n-input v-model:value="confirmation.pin" placeholder="Enter User PIN" />-->
+<!--            </div>-->
           </div>
 
         </div>

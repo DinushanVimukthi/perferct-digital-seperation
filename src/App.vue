@@ -48,12 +48,7 @@ onMounted(() => {
     loaderStore.setLoading(false)
   }, 4000)
 })
-// const loader = ref(useLoaderStore().getLoading)
-//
-// watch(() => useLoaderStore().getLoading, (newValue, oldValue) => {
-//   console.log(newValue, oldValue)
-//   loader.value = newValue
-// })
+
 </script>
 
 <template>

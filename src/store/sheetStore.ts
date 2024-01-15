@@ -45,7 +45,6 @@ export const useSheetStore = defineStore('sheetStore', {
             return sheetArray;
         },
         getSheet: (state) => (sheetID: string) => {
-            console.log(sheetID)
             const values:Sheet[] = Object.values(state.sheets);
             const sheet = values.find((sheet: Sheet) => sheet.sheetID === sheetID);
             return sheet;

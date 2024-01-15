@@ -3,7 +3,15 @@
 import OutEmployeeLayout from "@/Layout/OutEmployeeLayout.vue";
 import {useJobStore} from "@store/jobStore.ts";
 import {ref, computed, onMounted} from "vue";
-import {EyeOutline, SearchOutline, Checkmark, DocumentTextOutline, Close,CheckmarkCircle} from "@vicons/ionicons5";
+import {
+  EyeOutline,
+  SearchOutline,
+  Checkmark,
+  DocumentTextOutline,
+  Close,
+  CheckmarkCircle,
+  Send
+} from "@vicons/ionicons5";
 import {
   NCard,
   NIcon,
@@ -50,7 +58,35 @@ const TagColor = (priority:string) => {
       return "info"
   }
 };
+const TagColors = (status: string) => {
+  // status : Approved, Completed, Delivered,Processing,Pending, Started
+  switch (status) {
+    case "Approved":
+      return {color: '#a7f19b', textColor: '#000000', borderColor: '#42ff00'}
+    case "Completed":
+      return {color: '#b9fff9', textColor: '#000000', borderColor: '#00ffe9'}
+    case "Delivered":
+      return {color: '#98ccf6', textColor: '#000000', borderColor: '#002aff'}
+    case "Processing":
+      return {color: '#f6f198', textColor: '#000000', borderColor: '#000000'}
+    case "Pending":
+      return {color: '#e298f6', textColor: '#000000', borderColor: '#c100ff'}
+    case "Started":
+      return {color: '#f69898', textColor: '#000000', borderColor: '#ff0000'}
 
+  }
+};
+
+const TagIcon = (task: string) => {
+  if (task == "Delivered") {
+    return Delivery
+  }
+  if (task == "Deliverable") {
+    return Send
+  } else {
+    return EyeOutline
+  }
+};
 
 const selectedJob =ref();
 const viewJobModel = ref(false);
@@ -92,7 +128,6 @@ const drawRectangle = (ctx: CanvasRenderingContext2D, x: number, y: number, widt
 };
 
 const draw = (cutSheet: CutSheet,sheet:BalanceSheet[]) => {
-  console.log(sheet);
   const canvas: HTMLCanvasElement = canvasRef.value as HTMLCanvasElement;
   const ctx = canvas.getContext('2d');
   if (!ctx) {
@@ -136,7 +171,6 @@ const draw = (cutSheet: CutSheet,sheet:BalanceSheet[]) => {
           c.height = tmp;
         }
       }
-      console.log(c)
 
 
       rightCorner = true;
@@ -162,7 +196,6 @@ const draw = (cutSheet: CutSheet,sheet:BalanceSheet[]) => {
 
 const Employees =computed(()=>{
   const outEmployee = useAdminStore().getOutEmployees;
-  console.log(outEmployee)
   const employees = [];
   for (const employee of outEmployee) {
     employees.push({
@@ -184,7 +217,6 @@ onMounted(()=>{
 })
 
 const ViewJob = (job:Job) =>{
-  console.log(job);
   selectedJob.value = job;
   viewJobModel.value = true;
 }
@@ -494,6 +526,7 @@ const getTask = (tasks) => {
           <th>Job Name</th>
           <th>Job ID</th>
           <th>Sheet ID</th>
+          <th>Status</th>
           <th>Submitted Time</th>
           <th>Priority</th>
           <th>Deadline</th>
@@ -501,14 +534,25 @@ const getTask = (tasks) => {
         </tr>
         </thead>
         <tbody>
-        <tr v-for="job in jobStore.getPendingJobs" :key="job.jobID" v-if="jobStore.getPendingJobs.length > 0">
+        <tr v-for="job in jobStore.getOngoingAndPendingJobs" :key="job.jobID" v-if="jobStore.getOngoingAndPendingJobs.length > 0">
           <td>{{job.jobName}}</td>
           <td>{{job.jobID}}</td>
           <td>{{job.sheetID}}</td>
+          <td>
+            <n-tag
+              :color="TagColors(job.currentStatus)"
+              class="px-2 min-w-[110px]" round>
+            <template #icon>
+              <n-icon :component="TagIcon(job.currentStatus)" size="medium" class="ml-2"/>
+            </template>
+            <span class="text-sm">
+                {{ job.currentStatus }}
+              </span>
+          </n-tag></td>
           <td>{{job.createdTime}}</td>
           <td>
             <n-tag
-                :type="TagColor(job.Priority)"
+                :type="TagColor(job.priority)"
             >
             <span class="text-sm font-bold">
                 {{job.priority ?? "N/A"}}

@@ -105,8 +105,6 @@ const getCurrentUser = async () => {
                 //get current path
                 const currentPath = router.currentRoute.value.path
                 const currentRole = path.split("/")[1]
-                console.log(currentPath.split("/")[1])
-                console.log(currentRole)
                 if (currentPath.split("/")[1] !== currentRole) {
                     router.push(path)
                 }else{
@@ -115,7 +113,6 @@ const getCurrentUser = async () => {
 
             }
         } else {
-            console.log("no user")
         }
     })
 }

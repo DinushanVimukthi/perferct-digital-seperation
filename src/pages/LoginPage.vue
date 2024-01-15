@@ -51,7 +51,6 @@ const login =async () => {
       router.push(path)
       notify('success','Success','Logged in successfully');
     }else{
-      console.log(result)
       const error = result.error
       if (error.code === 'auth/user-not-found'){
         notify('error','Error','User not found');

@@ -9,6 +9,7 @@ import ReportIssue from "@pages/OutEmployee/ReportIssue.vue";
 import InDashboard from "@pages/InEmployee/Dashboard.vue";
 import InCurrentJobs from "@pages/InEmployee/CurrentJobs.vue";
 import InSetting from "@pages/InEmployee/Setting.vue";
+import InStock from "@pages/InEmployee/Stock.vue";
 import CollectableJobs from "@pages/InEmployee/CollectableJobs.vue";
 
 
@@ -42,7 +43,6 @@ const routes = [
             requiresAuth: true
         },
         beforeEnter: async (to,from,next) => {
-            console.log(await IsUserLoggedIn())
             if (await IsUserLoggedIn()) {
                 const userID = useUserStore().getUserID
                 const user = await getUserFromDB(userID)
@@ -140,6 +140,11 @@ const routes = [
                 path: 'settings',
                 name: 'InProfile',
                 component: InSetting
+            },
+            {
+                path: 'stock',
+                name: 'InStock',
+                component: InStock
             }
             ],
         beforeEnter: () => {
@@ -208,10 +213,6 @@ const router = createRouter({
     routes
 })
 
-// router.beforeEach(async (to, from, next) => {
-//     const userStore = await IsUserLoggedIn()
-//     console.log(userStore)
-//     next()
-// })
+
 
 export default router

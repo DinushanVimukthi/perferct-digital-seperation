@@ -5,6 +5,7 @@ import {NTable,NForm,NFormItem,NInput,NInputNumber,NModal,NCard,FormInst,useMess
 import {computed, onBeforeMount, onMounted, ref, watch} from "vue";
 import {Sheet} from "@/types/Types.ts";
 import {useSheetStore} from "@store/sheetStore.ts";
+import InEmployeeLayout from "@/Layout/InEmployeeLayout.vue";
 
 const sheetStore = useSheetStore()
 const sheets = ref<Sheet[]>(sheetStore.sheets);
@@ -201,53 +202,53 @@ const message = useMessage()
 </script>
 
 <template>
-  <StockManagerLayout>
-    <n-modal v-model:show="addSheetModal" title="Add Stock">
-      <n-card
-        class=" p-1 rounded-3xl flex items-center justify-center w-2/5"
-      >
-        <template #header>
-          <div class="text-2xl text-black text-center font-bold">Add New Sheet</div>
-        </template>
+  <InEmployeeLayout>
+<!--    <n-modal v-model:show="addSheetModal" title="Add Stock">-->
+<!--      <n-card-->
+<!--        class=" p-1 rounded-3xl flex items-center justify-center w-2/5"-->
+<!--      >-->
+<!--        <template #header>-->
+<!--          <div class="text-2xl text-black text-center font-bold">Add New Sheet</div>-->
+<!--        </template>-->
 
-        <n-form
-            ref="formRef"
-            :rules="rules"
-            label-placement="left"
-            :model="form"
-            class="w-full p-6">
-          <n-form-item label="Sheet ID" label-width="120px" label-align="center" path="sheetID" >
-            <n-input v-model:value="form.sheetID" readonly class="w-full font-bold" />
-          </n-form-item>
-          <n-form-item label="Sheet Type" label-width="120px" label-align="center" path="sheet Type" >
-            <n-input v-model:value="form.stockType"  class="w-full" maxlength="5" @input="()=>form.stockType = form.stockType.toLocaleUpperCase()"/>
-          </n-form-item>
+<!--        <n-form-->
+<!--            ref="formRef"-->
+<!--            :rules="rules"-->
+<!--            label-placement="left"-->
+<!--            :model="form"-->
+<!--            class="w-full p-6">-->
+<!--          <n-form-item label="Sheet ID" label-width="120px" label-align="center" path="sheetID" >-->
+<!--            <n-input v-model:value="form.sheetID" readonly class="w-full font-bold" />-->
+<!--          </n-form-item>-->
+<!--          <n-form-item label="Sheet Type" label-width="120px" label-align="center" path="sheet Type" >-->
+<!--            <n-input v-model:value="form.stockType"  class="w-full" maxlength="5" @input="()=>form.stockType = form.stockType.toLocaleUpperCase()"/>-->
+<!--          </n-form-item>-->
 
-          <n-form-item label="Thickness" label-width="120px" label-align="center" path="thickness">
-            <n-input-number v-model:value="form.thickness" class="w-full" />
-          </n-form-item>
-          <n-form-item label="Width" label-width="120px" label-align="center" path="width">
-            <n-input-number v-model:value="form.width" class="w-full" />
-          </n-form-item>
-          <n-form-item label="Length" label-width="120px" label-align="center" path="length">
-            <n-input-number v-model:value="form.length" class="w-full" />
-          </n-form-item>
-          <n-form-item label="No of Sheet" label-width="120px" label-align="center" path="length">
-            <n-input-number   v-model:value="form.count" class="w-full" />
-          </n-form-item>
-        </n-form>
-        <template #footer>
-          <div class="flex flex-row gap-2 justify-start">
-            <button class="bg-red-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" @click="addSheetModal = false">
-              Cancel
-            </button>
-            <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" @click="addSheet">
-              Add Sheet
-            </button>
-          </div>
-        </template>
-      </n-card>
-    </n-modal>
+<!--          <n-form-item label="Thickness" label-width="120px" label-align="center" path="thickness">-->
+<!--            <n-input-number v-model:value="form.thickness" class="w-full" />-->
+<!--          </n-form-item>-->
+<!--          <n-form-item label="Width" label-width="120px" label-align="center" path="width">-->
+<!--            <n-input-number v-model:value="form.width" class="w-full" />-->
+<!--          </n-form-item>-->
+<!--          <n-form-item label="Length" label-width="120px" label-align="center" path="length">-->
+<!--            <n-input-number v-model:value="form.length" class="w-full" />-->
+<!--          </n-form-item>-->
+<!--          <n-form-item label="No of Sheet" label-width="120px" label-align="center" path="length">-->
+<!--            <n-input-number   v-model:value="form.count" class="w-full" />-->
+<!--          </n-form-item>-->
+<!--        </n-form>-->
+<!--        <template #footer>-->
+<!--          <div class="flex flex-row gap-2 justify-start">-->
+<!--            <button class="bg-red-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" @click="addSheetModal = false">-->
+<!--              Cancel-->
+<!--            </button>-->
+<!--            <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" @click="addSheet">-->
+<!--              Add Sheet-->
+<!--            </button>-->
+<!--          </div>-->
+<!--        </template>-->
+<!--      </n-card>-->
+<!--    </n-modal>-->
     <n-modal v-model:show="editSheetModal" title="Edi Sheet">
       <n-card
         class=" p-1 rounded-3xl flex items-center justify-center w-2/5"
@@ -308,9 +309,9 @@ const message = useMessage()
         <div class="flex flex-row gap-2 items-center justify-between">
           <div class="text-2xl text-center font-bold my-4">Manage Stock
           </div>
-          <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" @click="openAddModal">
-            Add Sheet
-          </button>
+<!--          <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" @click="openAddModal">-->
+<!--            Add Sheet-->
+<!--          </button>-->
         </div>
         <div style="height: 80vh" class="overflow-y-scroll relative">
           <n-table
@@ -353,7 +354,7 @@ const message = useMessage()
         </div>
       </div>
     </div>
-  </StockManagerLayout>
+  </InEmployeeLayout>
 </template>
 
 <style scoped>

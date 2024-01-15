@@ -112,7 +112,6 @@ const sortTask = (tasks:Record<string,Task>)=>{
   return sortedTasks;
 }
 const draw = (cutSheet: CutSheet,sheet:BalanceSheet[]) => {
-  console.log(sheet);
   const canvas: HTMLCanvasElement = canvasRef.value as HTMLCanvasElement;
   const ctx = canvas.getContext('2d');
   if (!ctx) {
@@ -156,7 +155,6 @@ const draw = (cutSheet: CutSheet,sheet:BalanceSheet[]) => {
           c.height = tmp;
         }
       }
-      console.log(c)
 
 
       rightCorner = true;
@@ -231,7 +229,6 @@ const clearConfirmation = () => {
 
 const Employees = computed(() => {
   const outEmployee = useAdminStore().getOutEmployees;
-  console.log(outEmployee)
   const employees = [];
   for (const employee of outEmployee) {
     employees.push({
@@ -284,7 +281,6 @@ const filterJob = () => {
 }
 
 const elapsedTime = (startTime: string, endTime: string) => {
-  console.log(startTime, endTime)
   if (endTime.toString().trim() === "") {
     return moment.utc(moment().diff(moment(startTime, "HH:mm:ss"))).format("HH:mm:ss")
   }
@@ -633,7 +629,7 @@ const monthToSort = ref(Date.now());
         </template>
       </n-card>
     </n-modal>
-    <div class="m-1 p-8 bg-white  min-h-[95vh] ">
+    <div class="m-1 py-8 px-2 bg-white  min-h-[95vh] ">
       <div class="text-center pt-2 pb-2 w-full">
         <span class="text-3xl font-bold">
           Job History
@@ -652,7 +648,7 @@ const monthToSort = ref(Date.now());
           </n-button>
         </div>
       </div>
-      <div style="height: 80vh" class="overflow-y-scroll relative">
+      <div style="height: 80vh;max-width: 80vw" class="overflow-y-scroll flex items-start justify-center relative border-2">
         <n-table striped size="small" border="outer" class="w-full">
           <thead>
           <tr class="text-center">
@@ -707,7 +703,9 @@ const monthToSort = ref(Date.now());
           </tr>
 
           <tr v-else>
-            <td colspan="6" class="text-center">No Finished Jobs</td>
+            <td colspan="13" class="text-center text-red-500">
+              No Finished Jobs
+            </td>
           </tr>
           </tbody>
         </n-table>

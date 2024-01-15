@@ -105,7 +105,6 @@ const draw = (cutSheet: CutSheet,sheet:Sheet) => {
   drawRectangle(ctx, 20, 10, (parent.width - 50) * widthRatio, (parent.height - 50) * heightRatio, parent.width, parent.height, 'black');
   drawRectangle(ctx, 20, 10, (child.width - 50) * widthRatio, (child.height - 50) * heightRatio, child.width, child.height, 'red','yellow',label, true);
   const s = sheet;
-  console.log(sheet)
   for (let i = 0; i < s.length; i++) {
     const balanceSheet = s[i];
     const child = {
@@ -134,7 +133,6 @@ const timeDifference = (startTime:string,endTime:string)=>{
   return moment.utc(moment(endTimes).diff(moment(startTimes))).format("HH:mm:ss")
 }
 const elapsedTime = (startTime: string, endTime: string) => {
-  console.log(startTime, endTime)
   if (endTime.toString().trim() === "") {
     return moment.utc(moment().diff(moment(startTime, "HH:mm:ss"))).format("HH:mm:ss")
   }

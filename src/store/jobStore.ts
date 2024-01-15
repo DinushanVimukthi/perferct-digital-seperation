@@ -29,6 +29,16 @@ export const useJobStore = defineStore('jobStore', {
             }
             return jobs;
         },
+        getOngoingAndPendingJobs():Job[]{
+            let jobs: Job[] = [];
+            const values:Job[] = Object.values(this.jobs);
+            for (let value of values) {
+                if(value.currentStatus==="Pending" || value.currentStatus ==="Processing" ){
+                    jobs.push(value);
+                }
+            }
+            return jobs;
+        },
         getLastJobID(): string {
             const keys = Object.keys(this.jobs);
             if (keys.length === 0) {
@@ -64,7 +74,6 @@ export const useJobStore = defineStore('jobStore', {
             const values:Task[] = Object.values(tasks);
             for (let value of values) {
                 if(value.finishedTime===""){
-                    console.log(value)
                     return value;
                 }
             }
@@ -107,7 +116,6 @@ export const useJobStore = defineStore('jobStore', {
                     jobs.push(value);
                 }
             }
-            console.log(jobs)
             return jobs;
         },
         getCollectableJobs: (state)=>{
@@ -126,7 +134,6 @@ export const useJobStore = defineStore('jobStore', {
             try {
                 await addJob(job);
             }catch (e) {
-                console.log(e)
             }
         },
         async editJob(job: Job) {
@@ -150,9 +157,6 @@ export const useJobStore = defineStore('jobStore', {
         async finishTask(jobID: string, taskName: string,userID:string) {
             const job: Job = Object.values(this.jobs).find((job: Job) => job.jobID === jobID);
             const task: Task = job.tasks[taskName];
-            console.log(task)
-            console.log(job);
-            console.log(jobID)
             task.finishedTime = new Date().toString();
             task.finishedBy = userID;
             await updateTask(jobID,taskName,task);

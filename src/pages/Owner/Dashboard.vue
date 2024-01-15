@@ -101,7 +101,6 @@ onMounted(async () => {
     })
 
 
-    console.log(jobsByDay)
 
     const options2 = {
 

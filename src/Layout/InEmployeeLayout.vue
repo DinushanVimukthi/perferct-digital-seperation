@@ -47,6 +47,11 @@ const SideBarLinks:SideBarLink[] =
           },
         ]
       },
+      {
+        name: "Stock",
+        icon: MingcuteTask2Line,
+        path: "/inEmp/stock",
+      },
 
 
     ]
